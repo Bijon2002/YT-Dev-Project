@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Army Rush 3D - YouTube Playables Edition</title>
+<title>Army Rush 3D - The King's Reclamation</title>
 <!-- Official YouTube Playables SDK -->
 <script src="https://www.youtube.com/game_api/v1"></script>
 <style>
@@ -13,39 +13,45 @@
     --accent: #11998e;
     --danger: #ff3366;
     --gold: #ffcf40;
+    --gold-glow: rgba(255,207,64,0.5);
     --neon-blue: #00f2fe;
-    --bg-dark: rgba(10, 16, 30, 0.9);
+    --bg-dark: rgba(10, 16, 30, 0.92);
     --border: rgba(255, 255, 255, 0.16);
     color-scheme: dark;
   }
   *{box-sizing:border-box;user-select:none;-webkit-user-select:none}
   html,body{
-    margin:0;width:100%;height:100%;overflow:hidden;background:#060a14;
+    margin:0;width:100%;height:100%;overflow:hidden;background:#050811;
     font-family:'Segoe UI',system-ui,-apple-system,sans-serif;touch-action:none;
   }
   #game{position:fixed;inset:0;outline:none}
   canvas{display:block;width:100%;height:100%}
   #hud{position:fixed;inset:0;pointer-events:none;color:#fff;display:flex;flex-direction:column;justify-content:space-between}
   
-  /* Top Navigation Bar */
-  .top-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:14px;pointer-events:auto}
+  /* Top Bar */
+  .top-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:12px;pointer-events:auto}
   .pill{
     background:var(--bg-dark);border:1px solid var(--border);border-radius:16px;
-    padding:8px 12px;box-shadow:0 8px 30px rgba(0,0,0,0.4);backdrop-filter:blur(12px);
-    display:flex;flex-direction:column;align-items:center;min-width:68px;
+    padding:8px 12px;box-shadow:0 8px 30px rgba(0,0,0,0.45);backdrop-filter:blur(12px);
+    display:flex;flex-direction:column;align-items:center;min-width:64px;
   }
   .pill.clickable{cursor:pointer;transition:transform 0.15s, background 0.15s;pointer-events:auto}
   .pill.clickable:active{transform:scale(0.93);background:rgba(255,255,255,0.18)}
   .label{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8ea3c7;font-weight:700}
-  .value{font-size:20px;font-weight:900;line-height:1.1;margin-top:2px}
+  .value{font-size:19px;font-weight:900;line-height:1.1;margin-top:2px}
   
   #progressWrap{
-    position:absolute;left:50%;top:14px;transform:translateX(-50%);
+    position:absolute;left:50%;top:12px;transform:translateX(-50%);
     width:min(44vw,380px);text-align:center;pointer-events:none;
   }
   #progress{height:9px;border-radius:99px;background:rgba(255,255,255,0.16);overflow:hidden;margin-top:5px}
   #bar{height:100%;width:0%;background:linear-gradient(90deg,#00f2fe,#4facfe,#38ef7d);transition:width .15s}
   
+  #kingBanner{
+    font-size:11px;font-weight:900;color:var(--gold);letter-spacing:0.12em;
+    text-shadow:0 0 10px rgba(255,207,64,0.6);margin-bottom:2px;text-transform:uppercase;
+  }
+
   /* Active Powerup Status */
   #powerupBadge{
     position:absolute;top:68px;left:50%;transform:translateX(-50%);
@@ -80,22 +86,22 @@
 
   /* Overlays / Modals */
   .modal-overlay{
-    position:absolute;inset:0;background:rgba(6,10,22,0.86);backdrop-filter:blur(14px);
+    position:absolute;inset:0;background:rgba(4,7,18,0.88);backdrop-filter:blur(14px);
     display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:50;
   }
   .card{
-    background:linear-gradient(180deg,#16213e,#0e1529);border:1px solid rgba(255,255,255,0.18);
-    border-radius:24px;padding:28px 24px;width:min(92vw,500px);text-align:center;
+    background:linear-gradient(180deg,#15203d,#0d1428);border:1px solid rgba(255,255,255,0.18);
+    border-radius:24px;padding:26px 22px;width:min(92vw,500px);text-align:center;
     box-shadow:0 24px 70px rgba(0,0,0,0.7);max-height:92vh;overflow-y:auto;
   }
-  .card h1{font-size:clamp(28px,6vw,44px);line-height:1;margin:0 0 6px;font-weight:900;letter-spacing:-0.03em;color:#fff}
-  .card h2{font-size:16px;color:#a0b4d6;margin:0 0 14px;font-weight:600}
-  .card p{font-size:14px;color:#c9d7f0;margin:8px 0 18px;line-height:1.5}
+  .card h1{font-size:clamp(26px,5.5vw,40px);line-height:1;margin:0 0 6px;font-weight:900;letter-spacing:-0.03em;color:#fff}
+  .card h2{font-size:15px;color:#a0b4d6;margin:0 0 14px;font-weight:600}
+  .card p{font-size:14px;color:#c9d7f0;margin:8px 0 18px;line-height:1.55}
   
   .btn{
-    border:0;border-radius:999px;padding:14px 34px;
+    border:0;border-radius:999px;padding:14px 32px;
     background:linear-gradient(135deg,#38ef7d,#11998e);
-    font-size:16px;font-weight:900;color:#07211a;cursor:pointer;
+    font-size:15px;font-weight:900;color:#07211a;cursor:pointer;
     box-shadow:0 8px 24px rgba(56,239,125,0.4);transition:transform 0.15s, box-shadow 0.15s;
     display:inline-block;margin:5px;
   }
@@ -105,9 +111,29 @@
     background:rgba(255,255,255,0.12);color:#fff;box-shadow:none;border:1px solid var(--border);
   }
   .btn.secondary:hover{background:rgba(255,255,255,0.2)}
+  .btn.royal{
+    background:linear-gradient(135deg,#ffd700,#ff8c00);color:#241200;box-shadow:0 8px 24px rgba(255,180,0,0.45);
+  }
   
-  /* Upgrades & Level Select Grid */
-  .upgrades-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0;text-align:left}
+  /* Input Fields */
+  .royal-input{
+    width:100%;padding:14px 18px;border-radius:14px;border:2px solid var(--gold);
+    background:rgba(0,0,0,0.4);color:#fff;font-size:18px;font-weight:700;
+    text-align:center;outline:none;box-shadow:0 0 20px rgba(255,207,64,0.25);margin:14px 0 20px;
+  }
+  .royal-input:focus{border-color:#fff;box-shadow:0 0 25px rgba(255,255,255,0.4)}
+
+  /* Story Scene Box */
+  .story-box{
+    background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.1);
+    border-radius:18px;padding:20px 16px;margin:16px 0;min-height:160px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .story-icon{font-size:54px;margin-bottom:12px;filter:drop-shadow(0 0 16px rgba(255,207,64,0.6))}
+  .story-text{font-size:15px;line-height:1.6;color:#e1ebfd;font-weight:500;min-height:75px}
+
+  /* Upgrades Grid */
+  .upgrades-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0;text-align:left}
   .up-item{
     background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
     border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:background 0.2s, transform 0.15s;
@@ -118,30 +144,42 @@
   .up-item .up-cost{font-size:11px;color:var(--gold);font-weight:700}
   .up-item.disabled{opacity:0.35;pointer-events:none}
 
-  /* Level Select Modal */
-  .level-grid{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin:16px 0}
-  .lvl-btn{
-    background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:12px;
-    padding:10px 4px;font-size:14px;font-weight:900;cursor:pointer;color:#fff;transition:background 0.15s;
+  /* Campaign Map Visual */
+  .campaign-map{
+    background:radial-gradient(ellipse at center,#172545,#0b1124);
+    border:1px solid rgba(255,207,64,0.3);border-radius:18px;
+    padding:16px;margin:14px 0;position:relative;overflow:hidden;
   }
-  .lvl-btn.active{background:linear-gradient(135deg,#38ef7d,#11998e);color:#07211a;border-color:#38ef7d}
-  .lvl-btn.locked{opacity:0.3;pointer-events:none;background:rgba(0,0,0,0.3)}
+  .map-track{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+  .map-row{display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .map-node{
+    flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;padding:8px 4px;font-size:11px;font-weight:800;color:#8ea3c7;
+    cursor:pointer;transition:all 0.2s;text-align:center;
+  }
+  .map-node.completed{background:rgba(56,239,125,0.15);border-color:#38ef7d;color:#38ef7d}
+  .map-node.current{background:linear-gradient(135deg,#ffcf40,#ff9900);color:#1a0f00;box-shadow:0 0 16px rgba(255,207,64,0.6);border-color:#fff}
+  .map-node.locked{opacity:0.35;pointer-events:none}
+  .map-citadel{
+    background:linear-gradient(135deg,#ffd700,#ff3366);color:#fff;font-weight:900;
+    padding:12px;border-radius:12px;margin-top:10px;border:1px solid #ffcf40;
+    box-shadow:0 0 20px rgba(255,207,64,0.4);
+  }
 
-  /* Bottom Controls hint */
+  /* Controls Hint */
   #controlsHint{
     padding:10px;text-align:center;font-size:12px;color:rgba(255,255,255,0.7);
-    background:rgba(6,10,20,0.65);backdrop-filter:blur(6px);border-top:1px solid rgba(255,255,255,0.08);
+    background:rgba(4,7,18,0.7);backdrop-filter:blur(6px);border-top:1px solid rgba(255,255,255,0.08);
   }
   
   @media(max-width:650px){
-    .top-bar{padding:10px}
-    .pill{padding:6px 9px;min-width:55px}
-    .value{font-size:17px}
-    #progressWrap{top:70px;width:68vw}
-    #bossbar{top:118px;width:88vw}
-    .card{padding:20px 16px}
+    .top-bar{padding:8px}
+    .pill{padding:5px 8px;min-width:52px}
+    .value{font-size:16px}
+    #progressWrap{top:66px;width:72vw}
+    #bossbar{top:114px;width:90vw}
+    .card{padding:18px 14px}
     .upgrades-grid{grid-template-columns:1fr 1fr 1fr;gap:6px}
-    .level-grid{grid-template-columns:repeat(5, 1fr);gap:6px}
   }
 </style>
 </head>
@@ -153,11 +191,12 @@
   <!-- Top Bar -->
   <div class="top-bar">
     <div class="pill">
-      <div class="label">Squad</div>
+      <div class="label">Army</div>
       <div class="value">⚔️ <span id="count">1</span></div>
     </div>
     
     <div id="progressWrap" class="pill">
+      <div id="kingBanner">👑 KING BIJON</div>
       <div class="label" id="stage">ZONE 1 • VERDANT PLAINS</div>
       <div id="progress"><div id="bar"></div></div>
     </div>
@@ -167,8 +206,8 @@
         <div class="label">Coins</div>
         <div class="value">🪙 <span id="coins">0</span></div>
       </div>
-      <div class="pill clickable" id="levelSelectBtn" title="Choose Zone">
-        <div class="label">Zone</div>
+      <div class="pill clickable" id="mapBtn" title="Reclamation Map">
+        <div class="label">Map</div>
         <div class="value">🗺️</div>
       </div>
       <div class="pill clickable" id="soundBtn" title="Toggle Audio">
@@ -178,7 +217,7 @@
     </div>
   </div>
 
-  <div id="powerupBadge">NITRO BOOST!</div>
+  <div id="powerupBadge">NITRO OVERDRIVE!</div>
 
   <!-- Boss Health Bar -->
   <div id="bossbar">
@@ -195,18 +234,70 @@
 
   <div id="comboText">SQUAD SURGE!</div>
 
-  <!-- Bottom Hint -->
   <div id="controlsHint">
     Desktop: <b>A / D</b> or <b>← / →</b> &nbsp;•&nbsp; Mobile: <b>Drag Screen Left / Right</b>
   </div>
 </div>
 
-<!-- Main Modal (Menu, Victory, Defeat) -->
-<div id="modalOverlay" class="modal-overlay">
+<!-- 1. NAME REGISTRATION MODAL -->
+<div id="nameModal" class="modal-overlay" style="display:none">
+  <div class="card">
+    <div style="font-size:52px;margin-bottom:6px">👑</div>
+    <h1>NAME YOUR KING</h1>
+    <h2>Reclaim Your Stolen Throne</h2>
+    <p>Your peaceful kingdom was conquered in a catastrophic war and you were banished to the far frontier. Enter your royal name to lead the vengeance march:</p>
+    <input type="text" id="kingNameInput" class="royal-input" maxlength="18" value="Bijon" placeholder="Your Royal Name">
+    <button class="btn royal" id="btnCrown">CROWN ME & BEGIN SAGA</button>
+  </div>
+</div>
+
+<!-- 2. ANIMATED PROLOGUE STORY MODAL -->
+<div id="storyModal" class="modal-overlay" style="display:none">
+  <div class="card">
+    <h1 id="storyChapterTitle">PROLOGUE</h1>
+    <h2 id="storyChapterSub">CHAPTER I: THE GOLDEN EMPIRE</h2>
+    
+    <div class="story-box">
+      <div class="story-icon" id="storyIcon">🏰</div>
+      <div class="story-text" id="storyText">Loading tale of the realm...</div>
+    </div>
+    
+    <div style="display:flex;justify-content:center;gap:8px">
+      <button class="btn secondary" id="btnSkipStory">SKIP INTRO</button>
+      <button class="btn royal" id="btnNextStory">CONTINUE >></button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. CAMPAIGN MAP MODAL -->
+<div id="mapModal" class="modal-overlay" style="display:none">
+  <div class="card">
+    <h1>CAMPAIGN MAP</h1>
+    <h2 id="mapRemaining">10 ZONES TO RECLAIM THE CITADEL</h2>
+    
+    <div class="campaign-map">
+      <div style="font-size:11px;font-weight:700;color:#ffcf40;letter-spacing:0.12em;text-transform:uppercase">
+        MARCH TOWARD THE ROYAL CITADEL
+      </div>
+      <div class="map-track">
+        <div class="map-row" id="mapRow1"></div>
+        <div class="map-row" id="mapRow2"></div>
+      </div>
+      <div class="map-citadel" id="mapCitadelNode">
+        🏰 ZONE 10: THE ROYAL CAPITAL CITADEL
+      </div>
+    </div>
+    
+    <button class="btn secondary" id="btnCloseMap">CLOSE MAP</button>
+  </div>
+</div>
+
+<!-- 4. MAIN ACTION MODAL (Menu, Upgrades, Victory, Defeat) -->
+<div id="modalOverlay" class="modal-overlay" style="display:none">
   <div class="card" id="modalCard">
     <h1 id="mTitle">ARMY RUSH 3D</h1>
-    <h2 id="mSubtitle">YouTube Playables Master Edition</h2>
-    <p id="mDesc">Collect blue troopers, pass through multiplier gates, dodge hazards & swinging pendulums, grab powerups, and defeat 10 unique zone bosses!</p>
+    <h2 id="mSubtitle">The King's Reclamation</h2>
+    <p id="mDesc">Collect blue troopers, pass through multiplier gates, avoid swinging pendulums, and crush the warlords across all 10 battle zones!</p>
     
     <!-- Armory Upgrades -->
     <div class="upgrades-grid" id="upgradesGrid">
@@ -228,36 +319,24 @@
     </div>
 
     <div>
-      <button class="btn" id="mAction">START MISSION</button>
-      <button class="btn secondary" id="mZoneSelect">SELECT ZONE (1-10)</button>
+      <button class="btn royal" id="mAction">MARCH FORWARD</button>
+      <button class="btn secondary" id="mOpenMap">VIEW MAP (10 ZONES)</button>
     </div>
-  </div>
-</div>
-
-<!-- Level Select Modal -->
-<div id="levelModal" class="modal-overlay" style="display:none">
-  <div class="card">
-    <h1>SELECT BATTLE ZONE</h1>
-    <h2>10 Unique Biomes & Legendary Bosses</h2>
-    <div class="level-grid" id="levelButtons"></div>
-    <button class="btn secondary" id="closeLevelModal">BACK</button>
   </div>
 </div>
 
 <!-- Game Engine & Playables SDK Scripts -->
 <script type="module">
-// Load local Three.js module (100% compliant with YouTube Playables)
+// Load local Three.js module
 import * as THREE from './js/three.module.js';
 
 /* =========================================================================
-   1. PROCEDURAL WEB AUDIO SYNTHESIS ENGINE (Zero Assets, Zero Latency)
+   1. PROCEDURAL SOUND SYNTHESIS ENGINE
    ========================================================================= */
 class SoundEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
-    this.bgmPlaying = false;
-    this.bgmStep = 0;
   }
   init() {
     if (!this.ctx) {
@@ -324,6 +403,9 @@ class SoundEngine {
     const notes = [420, 370, 320, 220];
     notes.forEach((f, i) => setTimeout(() => this.playTone(f, 'sawtooth', 0.22, 0.26, -40), i * 110));
   }
+  sfxStory() {
+    this.playTone(523, 'sine', 0.4, 0.25, 100);
+  }
 }
 const sfx = new SoundEngine();
 
@@ -368,7 +450,7 @@ const Playables = {
   saveProgress(data) {
     try {
       const json = JSON.stringify(data);
-      localStorage.setItem('army_rush_save_v2', json);
+      localStorage.setItem('army_rush_save_saga', json);
       if (this.isSDKAvailable) {
         window.ytgame.game?.saveData?.(json);
       }
@@ -376,7 +458,7 @@ const Playables = {
   },
   loadProgress() {
     try {
-      const local = localStorage.getItem('army_rush_save_v2');
+      const local = localStorage.getItem('army_rush_save_saga');
       if (local) return JSON.parse(local);
     } catch(e){}
     return null;
@@ -384,9 +466,11 @@ const Playables = {
 };
 
 /* =========================================================================
-   3. PERSISTENT PROGRESS & UPGRADE ARSENAL
+   3. PERSISTENT PROGRESS & KING INITIALIZATION
    ========================================================================= */
 const progress = Playables.loadProgress() || {
+  playerName: '',
+  hasSeenStory: false,
   coins: 0,
   maxLevel: 1,
   highScore: 0,
@@ -400,12 +484,15 @@ const progress = Playables.loadProgress() || {
 function saveState() {
   Playables.saveProgress(progress);
   document.querySelector('#coins').textContent = progress.coins;
+  if (progress.playerName) {
+    document.querySelector('#kingBanner').textContent = `👑 KING ${progress.playerName.toUpperCase()}`;
+  }
   renderUpgrades();
-  renderLevelGrid();
+  renderMap();
 }
 
 /* =========================================================================
-   4. 10 UNIQUE BATTLE ZONES (BIOMES, PROPS & BOSSES)
+   4. 10 UNIQUE BATTLE ZONES
    ========================================================================= */
 const BIOMES = [
   {
@@ -471,7 +558,7 @@ const BIOMES = [
 ];
 
 /* =========================================================================
-   5. THREE.JS 3D WORLD & GRAPHICS SETUP
+   5. THREE.JS 3D SCENE & ENGINE SETUP
    ========================================================================= */
 const container = document.querySelector('#game');
 const scene = new THREE.Scene();
@@ -487,7 +574,6 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
 container.appendChild(renderer.domElement);
 
-// Lighting
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2.0);
 scene.add(hemiLight);
 
@@ -529,7 +615,6 @@ road.position.set(0, -0.12, -120);
 road.receiveShadow = true;
 scene.add(road);
 
-// Side borders & stripes
 for (const x of [-6.15, 6.15]) {
   const edge = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.22, 420), mat('#3d4e34'));
   edge.position.set(x, -0.02, -120);
@@ -598,7 +683,6 @@ function createScenery(propType) {
       arch.position.set(x, 1.6, z);
       sceneryGroup.add(arch);
     } else {
-      // Classic tree
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 1.8, 7), mat('#5c4033'));
       trunk.position.set(x, 0.9, z);
       const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1 + Math.random() * 0.6, 1), mat('#2d6a4f'));
@@ -610,7 +694,7 @@ function createScenery(propType) {
 }
 
 /* =========================================================================
-   6. 3D MODELS (Troopers, Bosses, Pendulum Traps, Gates)
+   6. 3D MODELS (Troops, Bosses, Pendulums)
    ========================================================================= */
 function box(parent, w, h, d, material, x, y, z) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
@@ -621,32 +705,37 @@ function box(parent, w, h, d, material, x, y, z) {
   return m;
 }
 
-function makeSoldier(team = 'blue', scale = 1) {
+function makeSoldier(team = 'blue', scale = 1, isKing = false) {
   const g = new THREE.Group();
   g.scale.setScalar(scale);
-  const shirt = team === 'blue' ? mats.blue : mats.red;
+  const shirt = team === 'blue' ? (isKing ? mats.gold : mats.blue) : mats.red;
   const legs = team === 'blue' ? mats.pants : mats.dark;
 
-  box(g, 0.58, 0.65, 0.34, shirt, 0, 1.08, 0); // Torso
+  box(g, 0.58, 0.65, 0.34, shirt, 0, 1.08, 0);
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10), mats.skin);
   head.position.set(0, 1.62, 0);
   head.castShadow = true;
   g.add(head);
 
-  // Helmet
-  const helmet = new THREE.Mesh(
-    new THREE.SphereGeometry(0.29, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.58),
-    team === 'blue' ? mats.blue2 : mats.red2
-  );
-  helmet.position.y = 1.78;
-  g.add(helmet);
+  if (isKing) {
+    // Royal Golden Crown for King!
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.24, 0.22, 6), mats.gold);
+    crown.position.y = 1.92;
+    g.add(crown);
+  } else {
+    const helmet = new THREE.Mesh(
+      new THREE.SphereGeometry(0.29, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.58),
+      team === 'blue' ? mats.blue2 : mats.red2
+    );
+    helmet.position.y = 1.78;
+    g.add(helmet);
+  }
 
   box(g, 0.2, 0.58, 0.22, legs, -0.17, 0.45, 0);
   box(g, 0.2, 0.58, 0.22, legs, 0.17, 0.45, 0);
   box(g, 0.18, 0.5, 0.2, shirt, -0.39, 1.1, 0);
   box(g, 0.18, 0.5, 0.2, shirt, 0.39, 1.1, 0);
 
-  // Rifle
   box(g, 0.12, 0.12, 0.74, mats.dark, 0.44, 1.03, -0.22);
   box(g, 0.09, 0.09, 0.26, mats.gold, 0.44, 1.03, -0.58);
   return g;
@@ -666,14 +755,12 @@ function makeBoss(scale = 1.0, type = 'warlord') {
   else if (type === 'void') bodyColor = mat('#240046', 0.2, 0.8);
   else if (type === 'galactic') bodyColor = mat('#4a0e4e', 0.2, 0.9);
 
-  // Body
   box(g, 2.6, 2.8, 1.6, bodyColor, 0, 2.1, 0);
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.85, 14, 12), mats.red2);
   head.position.set(0, 4.1, 0);
   head.castShadow = true;
   g.add(head);
 
-  // Horns / Crown
   const hornGeo = new THREE.ConeGeometry(0.26, 0.95, 8);
   for (const x of [-0.65, 0.65]) {
     const h = new THREE.Mesh(hornGeo, mats.gold);
@@ -682,7 +769,6 @@ function makeBoss(scale = 1.0, type = 'warlord') {
     g.add(h);
   }
 
-  // Giant Arms & Weapon
   box(g, 0.62, 1.6, 0.62, bodyColor, -1.8, 2.1, 0);
   box(g, 0.62, 1.6, 0.62, bodyColor, 1.8, 2.1, 0);
 
@@ -698,21 +784,15 @@ function makeBoss(scale = 1.0, type = 'warlord') {
   return g;
 }
 
-// Swinging Pendulum Blade
 function makePendulumTrap(x, z) {
   const g = new THREE.Group();
   g.position.set(x, 4.5, z);
-
-  // Top frame arch
   const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.8, 8), mats.dark);
   rod.position.y = -1.9;
   g.add(rod);
-
-  // Giant Spiked Blade
   const blade = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.15), mats.red2);
   blade.position.y = -3.8;
   g.add(blade);
-
   return { group: g, x, z, angle: Math.random() * Math.PI, speed: 2.8, alive: true };
 }
 
@@ -751,26 +831,41 @@ const ui = {
   coins: document.querySelector('#coins'),
   bar: document.querySelector('#bar'),
   stage: document.querySelector('#stage'),
+  kingBanner: document.querySelector('#kingBanner'),
   bossbar: document.querySelector('#bossbar'),
   bossName: document.querySelector('#bossName'),
   bossfill: document.querySelector('#bossfill'),
   combo: document.querySelector('#comboText'),
   soundBtn: document.querySelector('#soundBtn'),
   soundIcon: document.querySelector('#soundIcon'),
-  overlay: document.querySelector('#modalOverlay'),
-  levelModal: document.querySelector('#levelModal'),
+  mapBtn: document.querySelector('#mapBtn'),
+  powerupBadge: document.querySelector('#powerupBadge'),
+  zoneBanner: document.querySelector('#zoneBanner'),
+  zbTitle: document.querySelector('#zbTitle'),
+  zbDesc: document.querySelector('#zbDesc'),
+  // Modals
+  nameModal: document.querySelector('#nameModal'),
+  kingNameInput: document.querySelector('#kingNameInput'),
+  btnCrown: document.querySelector('#btnCrown'),
+  storyModal: document.querySelector('#storyModal'),
+  storyChapterTitle: document.querySelector('#storyChapterTitle'),
+  storyChapterSub: document.querySelector('#storyChapterSub'),
+  storyIcon: document.querySelector('#storyIcon'),
+  storyText: document.querySelector('#storyText'),
+  btnSkipStory: document.querySelector('#btnSkipStory'),
+  btnNextStory: document.querySelector('#btnNextStory'),
+  mapModal: document.querySelector('#mapModal'),
+  mapRemaining: document.querySelector('#mapRemaining'),
+  mapRow1: document.querySelector('#mapRow1'),
+  mapRow2: document.querySelector('#mapRow2'),
+  mapCitadelNode: document.querySelector('#mapCitadelNode'),
+  btnCloseMap: document.querySelector('#btnCloseMap'),
+  modalOverlay: document.querySelector('#modalOverlay'),
   mTitle: document.querySelector('#mTitle'),
   mSubtitle: document.querySelector('#mSubtitle'),
   mDesc: document.querySelector('#mDesc'),
   mAction: document.querySelector('#mAction'),
-  mZoneSelect: document.querySelector('#mZoneSelect'),
-  closeLevelModal: document.querySelector('#closeLevelModal'),
-  levelSelectBtn: document.querySelector('#levelSelectBtn'),
-  levelButtons: document.querySelector('#levelButtons'),
-  powerupBadge: document.querySelector('#powerupBadge'),
-  zoneBanner: document.querySelector('#zoneBanner'),
-  zbTitle: document.querySelector('#zbTitle'),
-  zbDesc: document.querySelector('#zbDesc')
+  mOpenMap: document.querySelector('#mOpenMap')
 };
 
 function updateSoundUI() {
@@ -842,7 +937,8 @@ function arrangeArmy() {
 
 function addArmy(count = 1) {
   for (let i = 0; i < count; i++) {
-    const s = makeSoldier('blue', 0.7);
+    const isKing = army.length === 0;
+    const s = makeSoldier('blue', isKing ? 0.8 : 0.7, isKing);
     s.position.set(gameState.playerX, 0, 5 + Math.random() * 2);
     scene.add(s);
     army.push({ group: s, targetX: 0, targetZ: 5, phase: Math.random() * Math.PI * 2 });
@@ -903,39 +999,31 @@ function buildLevel(levelIdx) {
 
   addArmy(progress.upgrades.startArmy);
 
-  // Generate track objects down the road (-20 to -240)
   for (let z = -20; z > -230; z -= 16) {
     const laneX = (Math.random() - 0.5) * 6.5;
     const roll = Math.random();
 
     if (roll < 0.28) {
-      // Choice Split Gates: Left vs Right
       const isMult = Math.random() < 0.4;
       const leftVal = isMult ? 2 : Math.floor(4 + Math.random() * 8);
       placeGate(-2.8, z, isMult ? `x${leftVal}` : `+${leftVal}`, isMult ? 'mult' : 'plus', leftVal);
 
-      // Penalty or smaller gate on right
       const isPenalty = Math.random() < 0.35;
       const rightVal = isPenalty ? 4 : 2;
       placeGate(2.8, z, isPenalty ? `-${rightVal}` : `+${rightVal}`, isPenalty ? 'minus' : 'plus', rightVal);
     } else if (roll < 0.45) {
-      // Enemy formation
       const enemyCount = Math.min(22, 4 + levelIdx * 2 + Math.floor(Math.random() * 4));
       placeEnemySquad(laneX, z, enemyCount);
     } else if (roll < 0.62) {
-      // Swinging Pendulum Trap!
       const p = makePendulumTrap(laneX, z);
       scene.add(p.group);
       pendulums.push(p);
     } else if (roll < 0.78) {
-      // Road hazard cones
       placeHazard(laneX, z);
     } else if (roll < 0.88) {
-      // Powerup: Nitro Pad or Shield
       if (Math.random() < 0.5) placeNitroPad(laneX, z);
       else placeShieldOrb(laneX, z);
     } else {
-      // Solo troop pickup + coins
       placeTroopPickup(laneX > 0 ? 2.5 : -2.5, z);
       placeCoins(laneX > 0 ? -2.5 : 2.5, z);
     }
@@ -1071,7 +1159,7 @@ addEventListener('pointermove', e => {
 });
 
 /* =========================================================================
-   10. MAIN LOOP & TICK
+   10. MAIN GAME LOOP
    ========================================================================= */
 function update(dt) {
   if (gameState.mode !== 'playing' || gameState.paused) return;
@@ -1080,12 +1168,10 @@ function update(dt) {
   const biome = BIOMES[(gameState.currentLevel - 1) % BIOMES.length];
   const agility = 7.2 + progress.upgrades.speed * 1.6;
 
-  // Steering
   if (keys['arrowleft'] || keys['a']) gameState.playerX -= agility * dt;
   if (keys['arrowright'] || keys['d']) gameState.playerX += agility * dt;
   gameState.playerX = THREE.MathUtils.clamp(gameState.playerX, -4.6, 4.6);
 
-  // Nitro Boost Handling
   let speedMultiplier = 1.0;
   if (gameState.nitroTimer > 0) {
     gameState.nitroTimer -= dt;
@@ -1096,7 +1182,6 @@ function update(dt) {
 
   const worldSpeed = biome.speed * speedMultiplier;
 
-  // Army smooth follow
   arrangeArmy();
   army.forEach((soldier) => {
     soldier.group.position.x = THREE.MathUtils.damp(soldier.group.position.x, soldier.targetX, 8, dt);
@@ -1104,20 +1189,17 @@ function update(dt) {
     soldier.group.rotation.y = Math.sin(gameState.elapsed * 6 + soldier.phase) * 0.08;
   });
 
-  // Road stripes animation
   stripes.forEach(s => {
     s.position.z += worldSpeed * dt;
     if (s.position.z > 25) s.position.z -= 380;
   });
 
-  // Oscillating Pendulum Traps
   pendulums.forEach(p => {
     p.angle += p.speed * dt;
     p.group.rotation.z = Math.sin(p.angle) * 0.95;
     p.z += worldSpeed * dt;
     p.group.position.z = p.z;
 
-    // Hit test with squad
     if (Math.abs(p.z - 5) < 1.3 && Math.abs(p.x - gameState.playerX) < 1.4) {
       if (gameState.nitroTimer <= 0) {
         sfx.sfxHit();
@@ -1131,7 +1213,6 @@ function update(dt) {
     }
   });
 
-  // Pickups & Gates
   for (const p of pickups) {
     if (!p.alive) continue;
     p.z += worldSpeed * dt;
@@ -1175,7 +1256,6 @@ function update(dt) {
     if (p.z > 16) { p.alive = false; scene.remove(p.group); }
   }
 
-  // Coins
   for (const c of coinsMesh) {
     if (!c.alive) continue;
     c.z += worldSpeed * dt;
@@ -1192,7 +1272,6 @@ function update(dt) {
     if (c.z > 16) { c.alive = false; scene.remove(c.mesh); }
   }
 
-  // Hazards
   for (const h of hazards) {
     if (!h.alive) continue;
     h.z += worldSpeed * dt;
@@ -1213,7 +1292,6 @@ function update(dt) {
     if (h.z > 16) { h.alive = false; scene.remove(h.group); }
   }
 
-  // Enemy Squads
   for (const e of enemySquads) {
     if (!e.alive) continue;
     e.z += worldSpeed * dt * 0.95;
@@ -1235,7 +1313,6 @@ function update(dt) {
     if (e.z > 16) { e.alive = false; scene.remove(e.group); }
   }
 
-  // Boss Shockwaves
   for (let i = shockwaves.length - 1; i >= 0; i--) {
     const sw = shockwaves[i];
     sw.z += 12 * dt;
@@ -1254,7 +1331,6 @@ function update(dt) {
     }
   }
 
-  // Particles
   for (let i = particles.length - 1; i >= 0; i--) {
     const pt = particles[i];
     pt.life -= dt;
@@ -1266,7 +1342,6 @@ function update(dt) {
     }
   }
 
-  // Boss Phase
   if (!gameState.spawnedBoss && gameState.elapsed > gameState.levelDuration) {
     gameState.spawnedBoss = true;
     ui.bossbar.style.display = 'block';
@@ -1280,7 +1355,6 @@ function update(dt) {
     gameState.boss.position.z = THREE.MathUtils.damp(gameState.boss.position.z, 2.8, 1.2, dt);
     gameState.boss.rotation.y = Math.sin(gameState.elapsed * 1.8) * 0.1;
 
-    // Boss shockwave attack periodic release
     if (Math.random() < dt * 0.45 && gameState.boss.position.z > -10) {
       spawnBossShockwave(gameState.boss.position.z);
     }
@@ -1307,7 +1381,6 @@ function update(dt) {
     }
   }
 
-  // Camera Shake & Position Follow
   if (gameState.screenShake > 0) {
     gameState.screenShake -= dt * 1.5;
     camera.position.x = gameState.playerX * 0.32 + (Math.random() - 0.5) * gameState.screenShake;
@@ -1323,71 +1396,136 @@ function update(dt) {
 }
 
 /* =========================================================================
-   11. STATE TRANSITIONS & MENUS
+   11. NARRATIVE STORY PROLOGUE SYSTEM
    ========================================================================= */
-function startLevel(lvl) {
-  sfx.init();
-  gameState.currentLevel = lvl;
-  gameState.mode = 'playing';
-  gameState.score = 0;
-  ui.overlay.style.display = 'none';
-  ui.levelModal.style.display = 'none';
-  ui.bossbar.style.display = 'none';
-  buildLevel(lvl);
-}
-
-function gameOver() {
-  gameState.mode = 'over';
-  sfx.sfxDefeat();
-  Playables.submitScore(gameState.score);
-  ui.bossbar.style.display = 'none';
-  showModal(
-    'SQUAD DEFEATED',
-    `Zone ${gameState.currentLevel} Overwhelmed`,
-    'Your army fell in combat. Use your earned coins to upgrade your squad below before your next assault!',
-    'RETRY MISSION'
-  );
-}
-
-function levelCleared() {
-  gameState.mode = 'won';
-  const reward = gameState.currentLevel * 35;
-  progress.coins += reward;
-  if (gameState.currentLevel >= progress.maxLevel && progress.maxLevel < BIOMES.length) {
-    progress.maxLevel = gameState.currentLevel + 1;
+const STORY_CHAPTERS = [
+  {
+    icon: '🏰',
+    title: 'CHAPTER I',
+    sub: 'THE GOLDEN REALM',
+    getText: (name) => `Long ago, King ${name} ruled the prosperous empire of Solaria with wisdom and glory. Your grand citadel prospered in peace, celebrated across the stars.`
+  },
+  {
+    icon: '⚔️',
+    title: 'CHAPTER II',
+    sub: 'THE CATACLYSMIC WAR',
+    getText: (name) => `Without warning, a coalition of 10 Dark Warlords struck! In a devastating war, your castles burned, your legions were overwhelmed, and you lost your entire kingdom.`
+  },
+  {
+    icon: '🌪️',
+    title: 'CHAPTER III',
+    sub: 'BANISHED TO THE OUTER RIM',
+    getText: (name) => `The Warlords used dark warp magic to exile King ${name} thousands of leagues away into the wilderness of Zone 1, stripped of your crown and riches.`
+  },
+  {
+    icon: '👑',
+    title: 'CHAPTER IV',
+    sub: 'THE RECLAMATION VOW',
+    getText: (name) => `Now, your vengeance begins! You must march across 10 dangerous zones, rally loyal soldiers, slay the 10 dark warlords, and reclaim your rightful kingdom!`
   }
-  saveState();
-  Playables.submitScore(gameState.score);
-  ui.bossbar.style.display = 'none';
+];
 
-  if (gameState.currentLevel < BIOMES.length) {
-    showModal(
-      'VICTORY! 🏆',
-      `Zone ${gameState.currentLevel} Conquered (+🪙${reward})`,
-      `Outstanding tactical command! Prepare your squad for the next theater of war: ${BIOMES[gameState.currentLevel].name}.`,
-      'ADVANCE TO NEXT ZONE'
-    );
+let storyIndex = 0;
+function showStoryChapter(index) {
+  sfx.sfxStory();
+  const c = STORY_CHAPTERS[index];
+  ui.storyIcon.textContent = c.icon;
+  ui.storyChapterTitle.textContent = c.title;
+  ui.storyChapterSub.textContent = c.sub;
+  ui.storyText.textContent = c.getText(progress.playerName || 'Bijon');
+  ui.btnNextStory.textContent = index === STORY_CHAPTERS.length - 1 ? 'BEGIN RECLAMATION ⚔️' : 'CONTINUE >>';
+}
+
+function startStory() {
+  storyIndex = 0;
+  ui.nameModal.style.display = 'none';
+  ui.storyModal.style.display = 'flex';
+  showStoryChapter(0);
+}
+
+ui.btnNextStory.addEventListener('click', () => {
+  storyIndex++;
+  if (storyIndex < STORY_CHAPTERS.length) {
+    showStoryChapter(storyIndex);
   } else {
-    showModal(
-      'GALACTIC CONQUEROR! 👑',
-      `All 10 Zones Liberated (+🪙${reward})`,
-      `Legendary! You defeated the Galactic Sovereign and conquered all 10 battle zones. Replay any zone to master your score!`,
-      'PLAY AGAIN'
-    );
+    progress.hasSeenStory = true;
+    saveState();
+    ui.storyModal.style.display = 'none';
+    showMainMenu();
   }
-}
+});
 
-function showModal(title, subtitle, desc, btnText) {
-  ui.mTitle.textContent = title;
-  ui.mSubtitle.textContent = subtitle;
-  ui.mDesc.textContent = desc;
-  ui.mAction.textContent = btnText;
-  ui.overlay.style.display = 'flex';
-  renderUpgrades();
-}
+ui.btnSkipStory.addEventListener('click', () => {
+  progress.hasSeenStory = true;
+  saveState();
+  ui.storyModal.style.display = 'none';
+  showMainMenu();
+});
+
+ui.btnCrown.addEventListener('click', () => {
+  const name = ui.kingNameInput.value.trim() || 'Bijon';
+  progress.playerName = name;
+  saveState();
+  startStory();
+});
 
 /* =========================================================================
-   12. ARMORY & LEVEL SELECT MODAL LOGIC
+   12. CAMPAIGN MAP SYSTEM
+   ========================================================================= */
+function renderMap() {
+  ui.mapRow1.innerHTML = '';
+  ui.mapRow2.innerHTML = '';
+  
+  const remaining = Math.max(0, 10 - progress.maxLevel);
+  ui.mapRemaining.textContent = remaining === 0 
+    ? 'CITADEL LIBERATED! REPLAY ANY ZONE' 
+    : `${remaining} ZONES REMAINING TO REACH THE CITADEL`;
+
+  BIOMES.forEach((b, i) => {
+    const node = document.createElement('div');
+    const isCompleted = b.id < progress.maxLevel;
+    const isCurrent = b.id === progress.maxLevel;
+    const isLocked = b.id > progress.maxLevel;
+
+    node.className = `map-node ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''}`;
+    node.innerHTML = `<div>Z${b.id}</div><div style="font-size:9px">${isCompleted ? '✓ CLEARED' : (isCurrent ? '📍 YOU' : '🔒')}</div>`;
+    
+    if (!isLocked) {
+      node.addEventListener('click', () => {
+        ui.mapModal.style.display = 'none';
+        startLevel(b.id);
+      });
+    }
+
+    if (i < 5) ui.mapRow1.appendChild(node);
+    else ui.mapRow2.appendChild(node);
+  });
+
+  const isCitadelUnlocked = progress.maxLevel >= 10;
+  ui.mapCitadelNode.style.opacity = isCitadelUnlocked ? '1' : '0.5';
+  ui.mapCitadelNode.style.cursor = isCitadelUnlocked ? 'pointer' : 'default';
+  if (isCitadelUnlocked) {
+    ui.mapCitadelNode.onclick = () => {
+      ui.mapModal.style.display = 'none';
+      startLevel(10);
+    };
+  }
+}
+
+ui.mapBtn.addEventListener('click', () => {
+  renderMap();
+  ui.mapModal.style.display = 'flex';
+});
+ui.mOpenMap.addEventListener('click', () => {
+  renderMap();
+  ui.mapModal.style.display = 'flex';
+});
+ui.btnCloseMap.addEventListener('click', () => {
+  ui.mapModal.style.display = 'none';
+});
+
+/* =========================================================================
+   13. ARMORY & PROGRESSION
    ========================================================================= */
 function renderUpgrades() {
   const up = progress.upgrades;
@@ -1408,23 +1546,6 @@ function renderUpgrades() {
   document.querySelector('#upSpeed').classList.toggle('disabled', progress.coins < costSpeed);
 }
 
-function renderLevelGrid() {
-  ui.levelButtons.innerHTML = '';
-  BIOMES.forEach(b => {
-    const btn = document.createElement('div');
-    const isUnlocked = b.id <= progress.maxLevel;
-    const isCurrent = b.id === gameState.currentLevel;
-    btn.className = `lvl-btn ${isCurrent ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`;
-    btn.innerHTML = `${b.id}<br><span style="font-size:9px;font-weight:600">${isUnlocked ? 'ZONE' : '🔒'}</span>`;
-    if (isUnlocked) {
-      btn.addEventListener('click', () => {
-        startLevel(b.id);
-      });
-    }
-    ui.levelButtons.appendChild(btn);
-  });
-}
-
 document.querySelector('#upStart').addEventListener('click', () => {
   const cost = 35 + (progress.upgrades.startArmy - 1) * 25;
   if (progress.coins >= cost) {
@@ -1434,7 +1555,6 @@ document.querySelector('#upStart').addEventListener('click', () => {
     saveState();
   }
 });
-
 document.querySelector('#upPower').addEventListener('click', () => {
   const cost = 40 + (progress.upgrades.firepower - 1) * 30;
   if (progress.coins >= cost) {
@@ -1444,7 +1564,6 @@ document.querySelector('#upPower').addEventListener('click', () => {
     saveState();
   }
 });
-
 document.querySelector('#upSpeed').addEventListener('click', () => {
   const cost = 30 + (progress.upgrades.speed - 1) * 20;
   if (progress.coins >= cost) {
@@ -1455,6 +1574,70 @@ document.querySelector('#upSpeed').addEventListener('click', () => {
   }
 });
 
+/* =========================================================================
+   14. STATE TRANSITIONS & MENUS
+   ========================================================================= */
+function startLevel(lvl) {
+  sfx.init();
+  gameState.currentLevel = lvl;
+  gameState.mode = 'playing';
+  gameState.score = 0;
+  ui.modalOverlay.style.display = 'none';
+  ui.mapModal.style.display = 'none';
+  ui.bossbar.style.display = 'none';
+  buildLevel(lvl);
+}
+
+function showMainMenu() {
+  ui.mTitle.textContent = `KING ${progress.playerName.toUpperCase()}'S ARMY`;
+  ui.mSubtitle.textContent = `Campaign: Zone ${gameState.currentLevel} of 10`;
+  ui.mDesc.textContent = `March across the frontiers to reconquer your stolen throne. Spend your gold coins in the Armory below to expand your squad size and firepower!`;
+  ui.mAction.textContent = `MARCH TO ZONE ${gameState.currentLevel}`;
+  ui.modalOverlay.style.display = 'flex';
+  renderUpgrades();
+}
+
+function gameOver() {
+  gameState.mode = 'over';
+  sfx.sfxDefeat();
+  Playables.submitScore(gameState.score);
+  ui.bossbar.style.display = 'none';
+  ui.mTitle.textContent = 'REGIMENT FALLEN';
+  ui.mSubtitle.textContent = `Zone ${gameState.currentLevel} Overwhelmed`;
+  ui.mDesc.textContent = `King ${progress.playerName}, your frontline was broken! Regroup your forces, upgrade your arms in the Armory below, and strike again!`;
+  ui.mAction.textContent = 'RETRY ASSAULT';
+  ui.modalOverlay.style.display = 'flex';
+  renderUpgrades();
+}
+
+function levelCleared() {
+  gameState.mode = 'won';
+  const reward = gameState.currentLevel * 40;
+  progress.coins += reward;
+  if (gameState.currentLevel >= progress.maxLevel && progress.maxLevel < BIOMES.length) {
+    progress.maxLevel = gameState.currentLevel + 1;
+  }
+  saveState();
+  Playables.submitScore(gameState.score);
+  ui.bossbar.style.display = 'none';
+
+  if (gameState.currentLevel < BIOMES.length) {
+    const nextZone = BIOMES[gameState.currentLevel];
+    ui.mTitle.textContent = 'VICTORY! 🏆';
+    ui.mSubtitle.textContent = `Zone ${gameState.currentLevel} Liberated (+🪙${reward})`;
+    ui.mDesc.textContent = `Glorious victory, King ${progress.playerName}! Another warlord has fallen. Advance deeper toward your Kingdom Citadel: ${nextZone.name}!`;
+    ui.mAction.textContent = `MARCH TO ${nextZone.name.split('• ')[0]}`;
+  } else {
+    // Grand Ending!
+    ui.mTitle.textContent = '👑 THE THRONE IS RECLAIMED!';
+    ui.mSubtitle.textContent = `King ${progress.playerName} Restores the Kingdom!`;
+    ui.mDesc.textContent = `The Galactic Sovereign has been crushed! The dark warlords are vanquished, and peace returns to your glorious empire. You are hailed as the Eternal King! (+🪙${reward})`;
+    ui.mAction.textContent = 'REIGN SUPREME (PLAY AGAIN)';
+  }
+  ui.modalOverlay.style.display = 'flex';
+  renderUpgrades();
+}
+
 ui.mAction.addEventListener('click', () => {
   if (gameState.mode === 'menu' || gameState.mode === 'over') {
     startLevel(gameState.currentLevel || 1);
@@ -1464,22 +1647,8 @@ ui.mAction.addEventListener('click', () => {
   }
 });
 
-ui.levelSelectBtn.addEventListener('click', () => {
-  renderLevelGrid();
-  ui.levelModal.style.display = 'flex';
-});
-
-ui.mZoneSelect.addEventListener('click', () => {
-  renderLevelGrid();
-  ui.levelModal.style.display = 'flex';
-});
-
-ui.closeLevelModal.addEventListener('click', () => {
-  ui.levelModal.style.display = 'none';
-});
-
 /* =========================================================================
-   13. INITIALIZATION & ANIMATION LOOP
+   15. INITIALIZATION & SAGA FLOW
    ========================================================================= */
 let lastFrameTime = performance.now();
 function animate(now) {
@@ -1497,9 +1666,19 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 
+// Initial boot check:
 saveState();
 Playables.init();
 Playables.onGameReady();
+
+if (!progress.playerName) {
+  // First time launch: Prompt for King Name
+  ui.nameModal.style.display = 'flex';
+} else if (!progress.hasSeenStory) {
+  startStory();
+} else {
+  showMainMenu();
+}
 </script>
 </body>
 </html>
