@@ -4,51 +4,60 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Army Rush 3D - YouTube Playables Edition</title>
-<!-- Official YouTube Playables SDK (Operates gracefully as no-op when testing locally) -->
+<!-- Official YouTube Playables SDK -->
 <script src="https://www.youtube.com/game_api/v1"></script>
 <style>
   :root{
     --primary: #38ef7d;
-    --primary-glow: rgba(56,239,125,0.4);
+    --primary-glow: rgba(56,239,125,0.45);
     --accent: #11998e;
     --danger: #ff3366;
     --gold: #ffcf40;
-    --bg-dark: rgba(10, 16, 30, 0.88);
-    --border: rgba(255, 255, 255, 0.14);
+    --neon-blue: #00f2fe;
+    --bg-dark: rgba(10, 16, 30, 0.9);
+    --border: rgba(255, 255, 255, 0.16);
     color-scheme: dark;
   }
   *{box-sizing:border-box;user-select:none;-webkit-user-select:none}
   html,body{
-    margin:0;width:100%;height:100%;overflow:hidden;background:#090d16;
+    margin:0;width:100%;height:100%;overflow:hidden;background:#060a14;
     font-family:'Segoe UI',system-ui,-apple-system,sans-serif;touch-action:none;
   }
   #game{position:fixed;inset:0;outline:none}
   canvas{display:block;width:100%;height:100%}
   #hud{position:fixed;inset:0;pointer-events:none;color:#fff;display:flex;flex-direction:column;justify-content:space-between}
   
-  /* Top Bar */
-  .top-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:16px;pointer-events:auto}
+  /* Top Navigation Bar */
+  .top-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:14px;pointer-events:auto}
   .pill{
     background:var(--bg-dark);border:1px solid var(--border);border-radius:16px;
-    padding:8px 14px;box-shadow:0 8px 30px rgba(0,0,0,0.35);backdrop-filter:blur(12px);
-    display:flex;flex-direction:column;align-items:center;min-width:75px;
+    padding:8px 12px;box-shadow:0 8px 30px rgba(0,0,0,0.4);backdrop-filter:blur(12px);
+    display:flex;flex-direction:column;align-items:center;min-width:68px;
   }
   .pill.clickable{cursor:pointer;transition:transform 0.15s, background 0.15s;pointer-events:auto}
-  .pill.clickable:active{transform:scale(0.94);background:rgba(255,255,255,0.15)}
-  .label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#8ea3c7;font-weight:700}
-  .value{font-size:22px;font-weight:900;line-height:1.1;margin-top:2px}
+  .pill.clickable:active{transform:scale(0.93);background:rgba(255,255,255,0.18)}
+  .label{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8ea3c7;font-weight:700}
+  .value{font-size:20px;font-weight:900;line-height:1.1;margin-top:2px}
   
   #progressWrap{
-    position:absolute;left:50%;top:16px;transform:translateX(-50%);
-    width:min(42vw,360px);text-align:center;pointer-events:none;
+    position:absolute;left:50%;top:14px;transform:translateX(-50%);
+    width:min(44vw,380px);text-align:center;pointer-events:none;
   }
-  #progress{height:10px;border-radius:99px;background:rgba(255,255,255,0.15);overflow:hidden;margin-top:6px}
+  #progress{height:9px;border-radius:99px;background:rgba(255,255,255,0.16);overflow:hidden;margin-top:5px}
   #bar{height:100%;width:0%;background:linear-gradient(90deg,#00f2fe,#4facfe,#38ef7d);transition:width .15s}
   
-  /* Boss Bar */
+  /* Active Powerup Status */
+  #powerupBadge{
+    position:absolute;top:68px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,#ff9900,#ff5500);border-radius:999px;
+    padding:4px 14px;font-size:11px;font-weight:900;letter-spacing:0.1em;
+    display:none;box-shadow:0 0 16px rgba(255,100,0,0.6);text-transform:uppercase;
+  }
+
+  /* Boss Health Bar */
   #bossbar{
-    display:none;position:absolute;top:92px;left:50%;transform:translateX(-50%);
-    width:min(75vw,500px);text-align:center;pointer-events:none;
+    display:none;position:absolute;top:90px;left:50%;transform:translateX(-50%);
+    width:min(78vw,520px);text-align:center;pointer-events:none;
   }
   #bossbar .pill{width:100%;padding:10px 18px}
   #bossbg{height:14px;background:rgba(255,255,255,0.2);border-radius:99px;overflow:hidden;margin-top:6px;width:100%}
@@ -57,63 +66,82 @@
   /* Floating Popups */
   #comboText{
     position:absolute;top:150px;left:50%;transform:translateX(-50%);
-    font-size:26px;font-weight:900;color:var(--gold);text-shadow:0 0 16px rgba(255,207,64,0.8);
-    pointer-events:none;opacity:0;transition:opacity 0.25s, transform 0.25s;
+    font-size:28px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(255,207,64,0.85);
+    pointer-events:none;opacity:0;transition:opacity 0.25s, transform 0.25s;white-space:nowrap;
   }
   
+  /* Zone Intro Banner */
+  #zoneBanner{
+    position:absolute;top:32%;left:50%;transform:translate(-50%,-50%) scale(0.9);
+    pointer-events:none;text-align:center;opacity:0;transition:opacity 0.4s, transform 0.4s;
+  }
+  #zoneBanner h2{font-size:clamp(26px,5.5vw,48px);font-weight:900;margin:0;letter-spacing:-0.03em;color:#fff;text-shadow:0 8px 30px #000}
+  #zoneBanner p{font-size:clamp(12px,2vw,16px);color:#9bc9e9;margin:6px 0 0;font-weight:700;letter-spacing:0.15em;text-transform:uppercase}
+
   /* Overlays / Modals */
   .modal-overlay{
-    position:absolute;inset:0;background:rgba(6,10,22,0.82);backdrop-filter:blur(10px);
+    position:absolute;inset:0;background:rgba(6,10,22,0.86);backdrop-filter:blur(14px);
     display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:50;
   }
   .card{
     background:linear-gradient(180deg,#16213e,#0e1529);border:1px solid rgba(255,255,255,0.18);
-    border-radius:24px;padding:30px 24px;width:min(90vw,480px);text-align:center;
-    box-shadow:0 24px 60px rgba(0,0,0,0.6);
+    border-radius:24px;padding:28px 24px;width:min(92vw,500px);text-align:center;
+    box-shadow:0 24px 70px rgba(0,0,0,0.7);max-height:92vh;overflow-y:auto;
   }
-  .card h1{font-size:clamp(30px,6vw,46px);line-height:1;margin:0 0 8px;font-weight:900;letter-spacing:-0.03em;color:#fff}
-  .card h2{font-size:18px;color:#a0b4d6;margin:0 0 16px;font-weight:600}
-  .card p{font-size:14px;color:#c9d7f0;margin:8px 0 20px;line-height:1.5}
+  .card h1{font-size:clamp(28px,6vw,44px);line-height:1;margin:0 0 6px;font-weight:900;letter-spacing:-0.03em;color:#fff}
+  .card h2{font-size:16px;color:#a0b4d6;margin:0 0 14px;font-weight:600}
+  .card p{font-size:14px;color:#c9d7f0;margin:8px 0 18px;line-height:1.5}
   
   .btn{
-    border:0;border-radius:999px;padding:15px 36px;
+    border:0;border-radius:999px;padding:14px 34px;
     background:linear-gradient(135deg,#38ef7d,#11998e);
-    font-size:17px;font-weight:900;color:#07211a;cursor:pointer;
+    font-size:16px;font-weight:900;color:#07211a;cursor:pointer;
     box-shadow:0 8px 24px rgba(56,239,125,0.4);transition:transform 0.15s, box-shadow 0.15s;
-    display:inline-block;margin:6px;
+    display:inline-block;margin:5px;
   }
   .btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(56,239,125,0.55)}
   .btn:active{transform:translateY(1px)}
   .btn.secondary{
     background:rgba(255,255,255,0.12);color:#fff;box-shadow:none;border:1px solid var(--border);
   }
+  .btn.secondary:hover{background:rgba(255,255,255,0.2)}
   
-  /* Upgrades Grid */
-  .upgrades-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:20px 0;text-align:left}
+  /* Upgrades & Level Select Grid */
+  .upgrades-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0;text-align:left}
   .up-item{
-    background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-    border-radius:14px;padding:12px;text-align:center;cursor:pointer;transition:background 0.2s;
+    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+    border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:background 0.2s, transform 0.15s;
   }
-  .up-item:hover{background:rgba(255,255,255,0.1)}
-  .up-item .up-name{font-size:11px;font-weight:700;color:#8ea3c7;text-transform:uppercase}
-  .up-item .up-val{font-size:18px;font-weight:900;color:#fff;margin:4px 0}
-  .up-item .up-cost{font-size:12px;color:var(--gold);font-weight:700}
-  .up-item.disabled{opacity:0.4;pointer-events:none}
+  .up-item:hover{background:rgba(255,255,255,0.12);transform:translateY(-2px)}
+  .up-item .up-name{font-size:10px;font-weight:700;color:#8ea3c7;text-transform:uppercase}
+  .up-item .up-val{font-size:17px;font-weight:900;color:#fff;margin:4px 0}
+  .up-item .up-cost{font-size:11px;color:var(--gold);font-weight:700}
+  .up-item.disabled{opacity:0.35;pointer-events:none}
+
+  /* Level Select Modal */
+  .level-grid{display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;margin:16px 0}
+  .lvl-btn{
+    background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:12px;
+    padding:10px 4px;font-size:14px;font-weight:900;cursor:pointer;color:#fff;transition:background 0.15s;
+  }
+  .lvl-btn.active{background:linear-gradient(135deg,#38ef7d,#11998e);color:#07211a;border-color:#38ef7d}
+  .lvl-btn.locked{opacity:0.3;pointer-events:none;background:rgba(0,0,0,0.3)}
 
   /* Bottom Controls hint */
   #controlsHint{
-    padding:12px;text-align:center;font-size:12px;color:rgba(255,255,255,0.65);
-    background:rgba(6,10,20,0.6);backdrop-filter:blur(6px);border-top:1px solid rgba(255,255,255,0.08);
+    padding:10px;text-align:center;font-size:12px;color:rgba(255,255,255,0.7);
+    background:rgba(6,10,20,0.65);backdrop-filter:blur(6px);border-top:1px solid rgba(255,255,255,0.08);
   }
   
   @media(max-width:650px){
     .top-bar{padding:10px}
-    .pill{padding:6px 10px;min-width:60px}
-    .value{font-size:18px}
-    #progressWrap{top:76px;width:65vw}
-    #bossbar{top:128px;width:85vw}
-    .card{padding:22px 18px}
-    .upgrades-grid{grid-template-columns:1fr;gap:8px}
+    .pill{padding:6px 9px;min-width:55px}
+    .value{font-size:17px}
+    #progressWrap{top:70px;width:68vw}
+    #bossbar{top:118px;width:88vw}
+    .card{padding:20px 16px}
+    .upgrades-grid{grid-template-columns:1fr 1fr 1fr;gap:6px}
+    .level-grid{grid-template-columns:repeat(5, 1fr);gap:6px}
   }
 </style>
 </head>
@@ -130,14 +158,18 @@
     </div>
     
     <div id="progressWrap" class="pill">
-      <div class="label" id="stage">ZONE 1 • PLAINS</div>
+      <div class="label" id="stage">ZONE 1 • VERDANT PLAINS</div>
       <div id="progress"><div id="bar"></div></div>
     </div>
     
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:6px;">
       <div class="pill">
         <div class="label">Coins</div>
         <div class="value">🪙 <span id="coins">0</span></div>
+      </div>
+      <div class="pill clickable" id="levelSelectBtn" title="Choose Zone">
+        <div class="label">Zone</div>
+        <div class="value">🗺️</div>
       </div>
       <div class="pill clickable" id="soundBtn" title="Toggle Audio">
         <div class="label">Audio</div>
@@ -146,33 +178,40 @@
     </div>
   </div>
 
+  <div id="powerupBadge">NITRO BOOST!</div>
+
   <!-- Boss Health Bar -->
   <div id="bossbar">
     <div class="pill">
-      <div class="label" id="bossName">ZONE 1 BOSS • BRUTE WARLORD</div>
+      <div class="label" id="bossName">ZONE 1 BOSS • FOREST WARLORD</div>
       <div id="bossbg"><div id="bossfill"></div></div>
     </div>
+  </div>
+
+  <div id="zoneBanner">
+    <h2 id="zbTitle">ZONE 1</h2>
+    <p id="zbDesc">VERDANT PLAINS</p>
   </div>
 
   <div id="comboText">SQUAD SURGE!</div>
 
   <!-- Bottom Hint -->
   <div id="controlsHint">
-    Desktop: <b>A / D</b> or <b>← / →</b> &nbsp;•&nbsp; Mobile: <b>Drag Left / Right</b>
+    Desktop: <b>A / D</b> or <b>← / →</b> &nbsp;•&nbsp; Mobile: <b>Drag Screen Left / Right</b>
   </div>
 </div>
 
-<!-- Modal Screen (Menu, Victory, Defeat, Armory Shop) -->
+<!-- Main Modal (Menu, Victory, Defeat) -->
 <div id="modalOverlay" class="modal-overlay">
   <div class="card" id="modalCard">
     <h1 id="mTitle">ARMY RUSH 3D</h1>
-    <h2 id="mSubtitle">YouTube Playables Edition</h2>
-    <p id="mDesc">Collect blue soldiers, pass through multiplier gates, avoid red hazards, and defeat the giant bosses across all 5 battle zones!</p>
+    <h2 id="mSubtitle">YouTube Playables Master Edition</h2>
+    <p id="mDesc">Collect blue troopers, pass through multiplier gates, dodge hazards & swinging pendulums, grab powerups, and defeat 10 unique zone bosses!</p>
     
     <!-- Armory Upgrades -->
     <div class="upgrades-grid" id="upgradesGrid">
       <div class="up-item" id="upStart">
-        <div class="up-name">Start Squad</div>
+        <div class="up-name">Start Troops</div>
         <div class="up-val" id="valStart">+1</div>
         <div class="up-cost" id="costStart">🪙 40</div>
       </div>
@@ -190,23 +229,35 @@
 
     <div>
       <button class="btn" id="mAction">START MISSION</button>
-      <button class="btn secondary" id="mShopToggle" style="display:none">ARMORY SHOP</button>
+      <button class="btn secondary" id="mZoneSelect">SELECT ZONE (1-10)</button>
     </div>
+  </div>
+</div>
+
+<!-- Level Select Modal -->
+<div id="levelModal" class="modal-overlay" style="display:none">
+  <div class="card">
+    <h1>SELECT BATTLE ZONE</h1>
+    <h2>10 Unique Biomes & Legendary Bosses</h2>
+    <div class="level-grid" id="levelButtons"></div>
+    <button class="btn secondary" id="closeLevelModal">BACK</button>
   </div>
 </div>
 
 <!-- Game Engine & Playables SDK Scripts -->
 <script type="module">
-// Load local Three.js module (ensures 100% offline compliance for YouTube Playables)
+// Load local Three.js module (100% compliant with YouTube Playables)
 import * as THREE from './js/three.module.js';
 
 /* =========================================================================
-   1. SOUND SYNTHESIS ENGINE (Web Audio API - Zero External Assets Needed)
+   1. PROCEDURAL WEB AUDIO SYNTHESIS ENGINE (Zero Assets, Zero Latency)
    ========================================================================= */
 class SoundEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.bgmPlaying = false;
+    this.bgmStep = 0;
   }
   init() {
     if (!this.ctx) {
@@ -236,33 +287,42 @@ class SoundEngine {
     } catch(e){}
   }
   sfxRecruit() {
-    this.playTone(440, 'triangle', 0.08, 0.22, 180);
-    setTimeout(() => this.playTone(660, 'sine', 0.12, 0.25, 200), 50);
+    this.playTone(480, 'triangle', 0.08, 0.22, 180);
+    setTimeout(() => this.playTone(720, 'sine', 0.12, 0.24, 200), 50);
   }
   sfxGate() {
-    this.playTone(320, 'square', 0.12, 0.18, 300);
-    setTimeout(() => this.playTone(580, 'triangle', 0.18, 0.24, 250), 60);
+    this.playTone(340, 'square', 0.12, 0.18, 300);
+    setTimeout(() => this.playTone(600, 'triangle', 0.18, 0.25, 250), 60);
+  }
+  sfxPenalty() {
+    this.playTone(260, 'sawtooth', 0.15, 0.25, -160);
   }
   sfxHit() {
-    this.playTone(180, 'sawtooth', 0.16, 0.25, -120);
+    this.playTone(170, 'sawtooth', 0.16, 0.25, -120);
   }
   sfxLaser() {
-    this.playTone(850, 'sawtooth', 0.07, 0.08, -600);
+    this.playTone(880, 'sawtooth', 0.06, 0.08, -600);
   }
   sfxCoin() {
-    this.playTone(987, 'sine', 0.06, 0.2, 300);
-    setTimeout(() => this.playTone(1318, 'sine', 0.12, 0.22), 60);
+    this.playTone(1046, 'sine', 0.06, 0.2, 300);
+    setTimeout(() => this.playTone(1396, 'sine', 0.12, 0.22), 60);
+  }
+  sfxBoost() {
+    this.playTone(300, 'sawtooth', 0.35, 0.25, 800);
+  }
+  sfxShield() {
+    this.playTone(550, 'sine', 0.25, 0.3, 300);
   }
   sfxBossRoar() {
-    this.playTone(90, 'sawtooth', 0.45, 0.35, -40);
+    this.playTone(80, 'sawtooth', 0.5, 0.4, -30);
   }
   sfxVictory() {
-    const notes = [523, 659, 784, 1046];
-    notes.forEach((f, i) => setTimeout(() => this.playTone(f, 'triangle', 0.22, 0.25), i * 90));
+    const notes = [523, 659, 784, 1046, 1318];
+    notes.forEach((f, i) => setTimeout(() => this.playTone(f, 'triangle', 0.22, 0.26), i * 85));
   }
   sfxDefeat() {
-    const notes = [400, 360, 320, 240];
-    notes.forEach((f, i) => setTimeout(() => this.playTone(f, 'sawtooth', 0.2, 0.25, -40), i * 110));
+    const notes = [420, 370, 320, 220];
+    notes.forEach((f, i) => setTimeout(() => this.playTone(f, 'sawtooth', 0.22, 0.26, -40), i * 110));
   }
 }
 const sfx = new SoundEngine();
@@ -275,24 +335,20 @@ const Playables = {
   init() {
     if (this.isSDKAvailable) {
       try {
-        // Sync initial audio state with YouTube
-        if (window.ytgame.system && typeof window.ytgame.system.isAudioEnabled === 'function') {
+        if (window.ytgame.system?.isAudioEnabled) {
           sfx.enabled = window.ytgame.system.isAudioEnabled();
           updateSoundUI();
         }
-        // Listen to audio changes from YouTube UI
         window.ytgame.system?.onAudioEnabledChange?.((enabled) => {
           sfx.enabled = enabled;
           updateSoundUI();
         });
-        // Listen to lifecycle pause/resume
         window.ytgame.system?.onPause?.(() => {
           if (gameState.mode === 'playing') gameState.paused = true;
         });
         window.ytgame.system?.onResume?.(() => {
           gameState.paused = false;
         });
-        // Notify YouTube that canvas / first frame is ready
         window.ytgame.game?.firstFrameReady?.();
       } catch(e) {
         console.warn('Playables SDK init error:', e);
@@ -312,7 +368,7 @@ const Playables = {
   saveProgress(data) {
     try {
       const json = JSON.stringify(data);
-      localStorage.setItem('army_rush_save', json);
+      localStorage.setItem('army_rush_save_v2', json);
       if (this.isSDKAvailable) {
         window.ytgame.game?.saveData?.(json);
       }
@@ -320,7 +376,7 @@ const Playables = {
   },
   loadProgress() {
     try {
-      const local = localStorage.getItem('army_rush_save');
+      const local = localStorage.getItem('army_rush_save_v2');
       if (local) return JSON.parse(local);
     } catch(e){}
     return null;
@@ -345,51 +401,72 @@ function saveState() {
   Playables.saveProgress(progress);
   document.querySelector('#coins').textContent = progress.coins;
   renderUpgrades();
+  renderLevelGrid();
 }
 
 /* =========================================================================
-   4. 5 UNIQUE BIOMES & LEVEL DEFINITIONS
+   4. 10 UNIQUE BATTLE ZONES (BIOMES, PROPS & BOSSES)
    ========================================================================= */
 const BIOMES = [
   {
-    name: "ZONE 1 • VERDANT PLAINS",
-    sky: '#9bc9e9', fog: '#9bc9e9',
-    road: '#c8b78c', grass: '#5c8a45',
-    bossName: "ZONE 1 BOSS • FOREST WARLORD",
-    bossHP: 100, bossScale: 1.0, length: 240,
-    speed: 8.5
+    id: 1, name: "ZONE 1 • VERDANT PLAINS",
+    sky: '#9bc9e9', fog: '#9bc9e9', road: '#c8b78c', grass: '#5c8a45',
+    bossName: "ZONE 1 BOSS • FOREST WARLORD", bossType: 'warlord',
+    bossHP: 110, bossScale: 1.0, speed: 8.5, length: 240, propType: 'tree'
   },
   {
-    name: "ZONE 2 • SUNSET CANYON",
-    sky: '#e59866', fog: '#d97d54',
-    road: '#b86b43', grass: '#d48c46',
-    bossName: "ZONE 2 BOSS • CANYON TITAN",
-    bossHP: 180, bossScale: 1.15, length: 270,
-    speed: 9.2
+    id: 2, name: "ZONE 2 • SUNSET CANYON",
+    sky: '#e59866', fog: '#d97d54', road: '#b86b43', grass: '#d48c46',
+    bossName: "ZONE 2 BOSS • CANYON TITAN", bossType: 'titan',
+    bossHP: 180, bossScale: 1.15, speed: 9.0, length: 260, propType: 'cactus'
   },
   {
-    name: "ZONE 3 • VOLCANIC FORTRESS",
-    sky: '#24141e', fog: '#381c2b',
-    road: '#1c1b24', grass: '#4a1525',
-    bossName: "ZONE 3 BOSS • NETHER OVERLORD",
-    bossHP: 280, bossScale: 1.3, length: 300,
-    speed: 10.0
+    id: 3, name: "ZONE 3 • FROZEN TUNDRA",
+    sky: '#a0d8ef', fog: '#8ec5db', road: '#e0f2f7', grass: '#b2ebf2',
+    bossName: "ZONE 3 BOSS • FROST COLOSSUS", bossType: 'frost',
+    bossHP: 260, bossScale: 1.25, speed: 9.5, length: 280, propType: 'ice_crystal'
   },
   {
-    name: "ZONE 4 • CYBER ARENA",
-    sky: '#0b0826', fog: '#190e38',
-    road: '#161938', grass: '#0a0d24',
-    bossName: "ZONE 4 BOSS • MECH BEHEMOTH",
-    bossHP: 400, bossScale: 1.45, length: 330,
-    speed: 10.8
+    id: 4, name: "ZONE 4 • VOLCANIC CALDERA",
+    sky: '#24141e', fog: '#381c2b', road: '#1c1b24', grass: '#4a1525',
+    bossName: "ZONE 4 BOSS • NETHER OVERLORD", bossType: 'nether',
+    bossHP: 350, bossScale: 1.35, speed: 10.0, length: 300, propType: 'magma_rock'
   },
   {
-    name: "ZONE 5 • CELESTIAL APEX",
-    sky: '#1e1145', fog: '#2e1966',
-    road: '#e6e1f2', grass: '#251754',
-    bossName: "FINAL BOSS • GALACTIC EMPEROR",
-    bossHP: 600, bossScale: 1.6, length: 360,
-    speed: 11.5
+    id: 5, name: "ZONE 5 • CYBER NEON CITY",
+    sky: '#0b0826', fog: '#190e38', road: '#141738', grass: '#090c24',
+    bossName: "ZONE 5 BOSS • MECH BEHEMOTH", bossType: 'mech',
+    bossHP: 450, bossScale: 1.45, speed: 10.5, length: 320, propType: 'cyber_pylon'
+  },
+  {
+    id: 6, name: "ZONE 6 • TOXIC WASTELAND",
+    sky: '#132b1a', fog: '#1e3d28', road: '#2d3b25', grass: '#1a331f',
+    bossName: "ZONE 6 BOSS • MUTANT GOLIATH", bossType: 'toxic',
+    bossHP: 560, bossScale: 1.5, speed: 11.0, length: 340, propType: 'bio_barrel'
+  },
+  {
+    id: 7, name: "ZONE 7 • SUNKEN ATLANTIS",
+    sky: '#092b3d', fog: '#0f3d54', road: '#174a5e', grass: '#06202e',
+    bossName: "ZONE 7 BOSS • LEVIATHAN KING", bossType: 'leviathan',
+    bossHP: 680, bossScale: 1.55, speed: 11.4, length: 360, propType: 'coral'
+  },
+  {
+    id: 8, name: "ZONE 8 • GOLDEN PHARAOH",
+    sky: '#e6a15c', fog: '#c97f3c', road: '#f2d08a', grass: '#c7914e',
+    bossName: "ZONE 8 BOSS • PHARAOH EMPEROR", bossType: 'pharaoh',
+    bossHP: 800, bossScale: 1.6, speed: 11.8, length: 380, propType: 'pyramid'
+  },
+  {
+    id: 9, name: "ZONE 9 • DARK VOID NETHER",
+    sky: '#170b29', fog: '#261245', road: '#22143d', grass: '#110521',
+    bossName: "ZONE 9 BOSS • VOID REAVER", bossType: 'void',
+    bossHP: 950, bossScale: 1.65, speed: 12.2, length: 400, propType: 'void_monolith'
+  },
+  {
+    id: 10, name: "ZONE 10 • CELESTIAL APEX",
+    sky: '#2c1a4d', fog: '#3e246e', road: '#f4effa', grass: '#301c59',
+    bossName: "FINAL BOSS • GALACTIC SOVEREIGN", bossType: 'galactic',
+    bossHP: 1200, bossScale: 1.75, speed: 12.6, length: 420, propType: 'astral_arch'
   }
 ];
 
@@ -398,7 +475,7 @@ const BIOMES = [
    ========================================================================= */
 const container = document.querySelector('#game');
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(56, innerWidth / innerHeight, 0.1, 280);
+const camera = new THREE.PerspectiveCamera(56, innerWidth / innerHeight, 0.1, 300);
 camera.position.set(0, 8.2, 13);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -415,13 +492,13 @@ const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2.0);
 scene.add(hemiLight);
 
 const sun = new THREE.DirectionalLight(0xffeedd, 3.2);
-sun.position.set(-10, 22, 14);
+sun.position.set(-10, 24, 14);
 sun.castShadow = true;
 sun.shadow.mapSize.set(1024, 1024);
-sun.shadow.camera.left = -26;
-sun.shadow.camera.right = 26;
-sun.shadow.camera.top = 35;
-sun.shadow.camera.bottom = -35;
+sun.shadow.camera.left = -28;
+sun.shadow.camera.right = 28;
+sun.shadow.camera.top = 38;
+sun.shadow.camera.bottom = -38;
 scene.add(sun);
 
 // Base Materials
@@ -431,11 +508,12 @@ const mats = {
   dark: mat('#212121'), pants: mat('#263238'), red: mat('#e53935'),
   red2: mat('#ef5350'), gold: mat('#ffca28', 0.35, 0.5), steel: mat('#90a4ae', 0.3, 0.7),
   boss: mat('#4a154b'), laser: mat('#00e5ff', 0.2, 0.8),
-  coin: mat('#ffd700', 0.25, 0.6)
+  coin: mat('#ffd700', 0.25, 0.6), nitro: mat('#ff6600', 0.3, 0.5),
+  shield: mat('#00e5ff', 0.2, 0.9)
 };
 
-// Ground & Road meshes
-const floorGeo = new THREE.PlaneGeometry(240, 400);
+// Ground & Road
+const floorGeo = new THREE.PlaneGeometry(260, 440);
 const floorMat = mat('#5c8a45');
 const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
@@ -443,7 +521,7 @@ floor.position.set(0, -0.16, -120);
 floor.receiveShadow = true;
 scene.add(floor);
 
-const roadGeo = new THREE.PlaneGeometry(12, 380);
+const roadGeo = new THREE.PlaneGeometry(12, 420);
 const roadMat = mat('#c8b78c');
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x = -Math.PI / 2;
@@ -453,54 +531,77 @@ scene.add(road);
 
 // Side borders & stripes
 for (const x of [-6.15, 6.15]) {
-  const edge = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 380), mat('#3d4e34'));
+  const edge = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.22, 420), mat('#3d4e34'));
   edge.position.set(x, -0.02, -120);
   scene.add(edge);
 }
 const stripes = [];
-for (let z = 25; z > -320; z -= 10) {
-  const s = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.03, 4.2), mat('#f8f4e6'));
+for (let z = 25; z > -360; z -= 10) {
+  const s = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.03, 4.4), mat('#f8f4e6'));
   s.position.set(0, 0.005, z);
   scene.add(s);
   stripes.push(s);
 }
 
-// Scenery Props (Trees, Rocks, Pillars)
+// Scenery Props
 const sceneryGroup = new THREE.Group();
 scene.add(sceneryGroup);
 
-function createScenery(biomeIndex) {
+function createScenery(propType) {
   while (sceneryGroup.children.length > 0) {
     const c = sceneryGroup.children[0];
     sceneryGroup.remove(c);
     if (c.geometry) c.geometry.dispose();
   }
-  const isCyber = biomeIndex === 3;
-  const isVolcanic = biomeIndex === 2;
-  const isDesert = biomeIndex === 1;
 
-  for (let i = 0; i < 90; i++) {
-    const z = 20 - Math.random() * 320;
+  for (let i = 0; i < 95; i++) {
+    const z = 20 - Math.random() * 340;
     const side = Math.random() < 0.5 ? -1 : 1;
-    const x = side * (8.5 + Math.random() * 16);
+    const x = side * (8.5 + Math.random() * 18);
 
-    if (isCyber) {
-      const p = new THREE.Mesh(new THREE.BoxGeometry(0.8, 3 + Math.random() * 6, 0.8), mat(Math.random()<0.5?'#00f0ff':'#ff0077', 0.3, 0.8));
+    if (propType === 'cyber_pylon') {
+      const p = new THREE.Mesh(new THREE.BoxGeometry(0.8, 3.5 + Math.random() * 6, 0.8), mat(Math.random()<0.5?'#00f0ff':'#ff0077', 0.2, 0.8));
       p.position.set(x, p.geometry.parameters.height/2, z);
       sceneryGroup.add(p);
-    } else if (isVolcanic) {
-      const r = new THREE.Mesh(new THREE.ConeGeometry(0.8 + Math.random() * 1.2, 3 + Math.random() * 3, 5), mat('#2b1f28'));
-      r.position.set(x, 1.5, z);
+    } else if (propType === 'magma_rock') {
+      const r = new THREE.Mesh(new THREE.ConeGeometry(0.9 + Math.random() * 1.2, 3.2 + Math.random() * 3, 5), mat('#2b1f28'));
+      r.position.set(x, 1.6, z);
       sceneryGroup.add(r);
-    } else if (isDesert) {
-      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 2.5 + Math.random() * 2, 7), mat('#4e7d42'));
-      c.position.set(x, 1.2, z);
+    } else if (propType === 'cactus') {
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 2.8 + Math.random() * 2, 7), mat('#4e7d42'));
+      c.position.set(x, 1.4, z);
       sceneryGroup.add(c);
+    } else if (propType === 'ice_crystal') {
+      const ice = new THREE.Mesh(new THREE.OctahedronGeometry(1.2 + Math.random() * 0.8, 0), mat('#c8f7ff', 0.2, 0.6));
+      ice.position.set(x, 1.8, z);
+      ice.rotation.set(Math.random(), Math.random(), Math.random());
+      sceneryGroup.add(ice);
+    } else if (propType === 'bio_barrel') {
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 1.4, 8), mat('#28a745', 0.3, 0.5));
+      b.position.set(x, 0.7, z);
+      sceneryGroup.add(b);
+    } else if (propType === 'coral') {
+      const cr = new THREE.Mesh(new THREE.DodecahedronGeometry(0.9 + Math.random() * 0.7, 0), mat('#ff6b6b'));
+      cr.position.set(x, 0.8, z);
+      sceneryGroup.add(cr);
+    } else if (propType === 'pyramid') {
+      const pyr = new THREE.Mesh(new THREE.ConeGeometry(2.0, 3.2, 4), mat('#e0a96d'));
+      pyr.position.set(x, 1.6, z);
+      pyr.rotation.y = Math.PI / 4;
+      sceneryGroup.add(pyr);
+    } else if (propType === 'void_monolith') {
+      const vm = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4.5, 0.6), mat('#5a189a', 0.2, 0.8));
+      vm.position.set(x, 2.2, z);
+      sceneryGroup.add(vm);
+    } else if (propType === 'astral_arch') {
+      const arch = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.2, 8, 16, Math.PI), mat('#ffd700', 0.3, 0.7));
+      arch.position.set(x, 1.6, z);
+      sceneryGroup.add(arch);
     } else {
       // Classic tree
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 1.8, 7), mat('#5c4033'));
       trunk.position.set(x, 0.9, z);
-      const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(1.0 + Math.random() * 0.6, 1), mat('#2d6a4f'));
+      const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1 + Math.random() * 0.6, 1), mat('#2d6a4f'));
       crown.position.set(x, 2.2, z);
       sceneryGroup.add(trunk);
       sceneryGroup.add(crown);
@@ -509,7 +610,7 @@ function createScenery(biomeIndex) {
 }
 
 /* =========================================================================
-   6. 3D MODELS (Troopers, Giant Bosses, Pickups, Gates)
+   6. 3D MODELS (Troopers, Bosses, Pendulum Traps, Gates)
    ========================================================================= */
 function box(parent, w, h, d, material, x, y, z) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
@@ -551,67 +652,100 @@ function makeSoldier(team = 'blue', scale = 1) {
   return g;
 }
 
-function makeBoss(scale = 1.0, bossColor = mats.boss) {
+function makeBoss(scale = 1.0, type = 'warlord') {
   const g = new THREE.Group();
   g.scale.setScalar(scale);
 
-  // Main body
-  box(g, 2.6, 2.8, 1.6, bossColor, 0, 2.1, 0);
+  let bodyColor = mats.boss;
+  if (type === 'frost') bodyColor = mat('#1976d2');
+  else if (type === 'nether') bodyColor = mat('#800e13');
+  else if (type === 'mech') bodyColor = mat('#2b2d42', 0.2, 0.8);
+  else if (type === 'toxic') bodyColor = mat('#1b4332');
+  else if (type === 'leviathan') bodyColor = mat('#0077b6');
+  else if (type === 'pharaoh') bodyColor = mat('#b8860b', 0.3, 0.6);
+  else if (type === 'void') bodyColor = mat('#240046', 0.2, 0.8);
+  else if (type === 'galactic') bodyColor = mat('#4a0e4e', 0.2, 0.9);
+
+  // Body
+  box(g, 2.6, 2.8, 1.6, bodyColor, 0, 2.1, 0);
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.85, 14, 12), mats.red2);
   head.position.set(0, 4.1, 0);
   head.castShadow = true;
   g.add(head);
 
-  // Horns
+  // Horns / Crown
   const hornGeo = new THREE.ConeGeometry(0.26, 0.95, 8);
-  for (const x of [-0.6, 0.6]) {
+  for (const x of [-0.65, 0.65]) {
     const h = new THREE.Mesh(hornGeo, mats.gold);
-    h.position.set(x, 4.9, 0);
+    h.position.set(x, 4.95, 0);
     h.rotation.z = x < 0 ? 0.45 : -0.45;
     g.add(h);
   }
 
-  // Giant Arms & Hammer
-  box(g, 0.6, 1.6, 0.6, bossColor, -1.8, 2.1, 0);
-  box(g, 0.6, 1.6, 0.6, bossColor, 1.8, 2.1, 0);
-  const hammerShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 3.8, 8), mats.steel);
-  hammerShaft.position.set(2.4, 2.2, 0.2);
-  hammerShaft.rotation.z = -0.35;
-  g.add(hammerShaft);
-  const hammerHead = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.8), mats.dark);
-  hammerHead.position.set(2.8, 3.8, 0.2);
-  g.add(hammerHead);
+  // Giant Arms & Weapon
+  box(g, 0.62, 1.6, 0.62, bodyColor, -1.8, 2.1, 0);
+  box(g, 0.62, 1.6, 0.62, bodyColor, 1.8, 2.1, 0);
+
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 4.0, 8), mats.steel);
+  shaft.position.set(2.4, 2.2, 0.2);
+  shaft.rotation.z = -0.35;
+  g.add(shaft);
+
+  const headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.8), mats.dark);
+  headMesh.position.set(2.8, 3.9, 0.2);
+  g.add(headMesh);
 
   return g;
 }
 
+// Swinging Pendulum Blade
+function makePendulumTrap(x, z) {
+  const g = new THREE.Group();
+  g.position.set(x, 4.5, z);
+
+  // Top frame arch
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.8, 8), mats.dark);
+  rod.position.y = -1.9;
+  g.add(rod);
+
+  // Giant Spiked Blade
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.15), mats.red2);
+  blade.position.y = -3.8;
+  g.add(blade);
+
+  return { group: g, x, z, angle: Math.random() * Math.PI, speed: 2.8, alive: true };
+}
+
 /* =========================================================================
-   7. GAME STATE & LOGIC
+   7. GAME STATE & VARIABLES
    ========================================================================= */
 const gameState = {
-  mode: 'menu', // 'menu', 'playing', 'paused', 'won', 'over'
+  mode: 'menu',
   paused: false,
   currentLevel: 1,
   score: 0,
   playerX: 0,
-  targetX: 0,
   elapsed: 0,
   levelDuration: 22,
   boss: null,
   bossHP: 100,
   bossMaxHP: 100,
   spawnedBoss: false,
-  screenShake: 0
+  screenShake: 0,
+  hasShield: false,
+  nitroTimer: 0
 };
 
 let army = [];
 let pickups = [];
 let hazards = [];
 let enemySquads = [];
+let pendulums = [];
 let particles = [];
 let coinsMesh = [];
+let shockwaves = [];
 
-// UI Elements
+// UI Cache
 const ui = {
   count: document.querySelector('#count'),
   coins: document.querySelector('#coins'),
@@ -624,12 +758,19 @@ const ui = {
   soundBtn: document.querySelector('#soundBtn'),
   soundIcon: document.querySelector('#soundIcon'),
   overlay: document.querySelector('#modalOverlay'),
+  levelModal: document.querySelector('#levelModal'),
   mTitle: document.querySelector('#mTitle'),
   mSubtitle: document.querySelector('#mSubtitle'),
   mDesc: document.querySelector('#mDesc'),
   mAction: document.querySelector('#mAction'),
-  mShopToggle: document.querySelector('#mShopToggle'),
-  upgradesGrid: document.querySelector('#upgradesGrid')
+  mZoneSelect: document.querySelector('#mZoneSelect'),
+  closeLevelModal: document.querySelector('#closeLevelModal'),
+  levelSelectBtn: document.querySelector('#levelSelectBtn'),
+  levelButtons: document.querySelector('#levelButtons'),
+  powerupBadge: document.querySelector('#powerupBadge'),
+  zoneBanner: document.querySelector('#zoneBanner'),
+  zbTitle: document.querySelector('#zbTitle'),
+  zbDesc: document.querySelector('#zbDesc')
 };
 
 function updateSoundUI() {
@@ -644,27 +785,40 @@ ui.soundBtn.addEventListener('click', () => {
 function showCombo(text) {
   ui.combo.textContent = text;
   ui.combo.style.opacity = '1';
-  ui.combo.style.transform = 'translateX(-50%) scale(1.18)';
+  ui.combo.style.transform = 'translateX(-50%) scale(1.15)';
   setTimeout(() => {
     ui.combo.style.opacity = '0';
     ui.combo.style.transform = 'translateX(-50%) scale(1.0)';
-  }, 600);
+  }, 650);
+}
+
+function showZoneBanner(title, desc) {
+  ui.zbTitle.textContent = title;
+  ui.zbDesc.textContent = desc;
+  ui.zoneBanner.style.opacity = '1';
+  ui.zoneBanner.style.transform = 'translate(-50%,-50%) scale(1.05)';
+  setTimeout(() => {
+    ui.zoneBanner.style.opacity = '0';
+    ui.zoneBanner.style.transform = 'translate(-50%,-50%) scale(0.9)';
+  }, 1600);
 }
 
 function clearEntities() {
-  const disposeGroup = (arr) => {
+  const disposeArr = (arr) => {
     for (const item of arr) {
       if (item.group) scene.remove(item.group);
       else if (item.mesh) scene.remove(item.mesh);
     }
     arr.length = 0;
   };
-  disposeGroup(army);
-  disposeGroup(pickups);
-  disposeGroup(hazards);
-  disposeGroup(enemySquads);
-  disposeGroup(particles);
-  disposeGroup(coinsMesh);
+  disposeArr(army);
+  disposeArr(pickups);
+  disposeArr(hazards);
+  disposeArr(enemySquads);
+  disposeArr(pendulums);
+  disposeArr(particles);
+  disposeArr(coinsMesh);
+  disposeArr(shockwaves);
   if (gameState.boss) {
     scene.remove(gameState.boss);
     gameState.boss = null;
@@ -672,7 +826,7 @@ function clearEntities() {
 }
 
 function arrangeArmy() {
-  const spacing = 0.92;
+  const spacing = 0.9;
   army.forEach((soldier, idx) => {
     if (idx === 0) {
       soldier.targetX = gameState.playerX;
@@ -698,6 +852,12 @@ function addArmy(count = 1) {
 }
 
 function removeArmy(count = 1) {
+  if (gameState.hasShield) {
+    gameState.hasShield = false;
+    sfx.sfxShield();
+    showCombo("SHIELD ABSORBED IMPACT!");
+    return;
+  }
   const removed = army.splice(Math.max(1, army.length - count), count);
   removed.forEach(s => {
     spawnDeathParticles(s.group.position.x, 1, s.group.position.z, '#1976d2');
@@ -706,64 +866,78 @@ function removeArmy(count = 1) {
   ui.count.textContent = army.length;
 }
 
-function spawnDeathParticles(x, y, z, colorStr = '#ff3366') {
-  for (let i = 0; i < 7; i++) {
+function spawnDeathParticles(x, y, z, colorStr = '#ff3366', count = 7) {
+  for (let i = 0; i < count; i++) {
     const p = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), mat(colorStr));
     p.position.set(x, y, z);
-    p.velocity = new THREE.Vector3((Math.random() - 0.5) * 5, 2 + Math.random() * 4, (Math.random() - 0.5) * 5);
+    p.velocity = new THREE.Vector3((Math.random() - 0.5) * 6, 2.5 + Math.random() * 4, (Math.random() - 0.5) * 6);
     scene.add(p);
     particles.push({ mesh: p, life: 0.45 });
   }
 }
 
 /* =========================================================================
-   8. PROCEDURAL LEVEL BUILDER
+   8. PROCEDURAL LEVEL BUILDER (10 ZONES)
    ========================================================================= */
 function buildLevel(levelIdx) {
   clearEntities();
   const biome = BIOMES[(levelIdx - 1) % BIOMES.length];
 
-  // Set Biome visuals
   scene.background = new THREE.Color(biome.sky);
-  scene.fog = new THREE.Fog(biome.fog, 35, 160);
+  scene.fog = new THREE.Fog(biome.fog, 35, 170);
   roadMat.color.set(biome.road);
   floorMat.color.set(biome.grass);
-  createScenery((levelIdx - 1) % BIOMES.length);
+  createScenery(biome.propType);
 
   gameState.playerX = 0;
-  gameState.targetX = 0;
   gameState.elapsed = 0;
   gameState.spawnedBoss = false;
   gameState.bossHP = biome.bossHP;
   gameState.bossMaxHP = biome.bossHP;
+  gameState.hasShield = false;
+  gameState.nitroTimer = 0;
+
   ui.stage.textContent = biome.name;
   ui.bossName.textContent = biome.bossName;
+  showZoneBanner(`ZONE ${biome.id}`, biome.name.split('• ')[1] || 'BATTLEFIELD');
 
-  // Add initial squad based on upgrade
   addArmy(progress.upgrades.startArmy);
 
-  // Generate track objects down the road (-15 to -220)
-  for (let z = -20; z > -210; z -= 18) {
+  // Generate track objects down the road (-20 to -240)
+  for (let z = -20; z > -230; z -= 16) {
     const laneX = (Math.random() - 0.5) * 6.5;
-    const typeRoll = Math.random();
+    const roll = Math.random();
 
-    if (typeRoll < 0.32) {
-      // Multiplier or Addition Gate
-      const isMult = Math.random() < 0.35;
-      const val = isMult ? 2 : Math.floor(3 + Math.random() * 8);
-      placeGate(laneX > 0 ? 2.5 : -2.5, z, isMult ? `x${val}` : `+${val}`, isMult ? 'mult' : 'plus', val);
-      // Place coin ring on other side
-      placeCoins(laneX > 0 ? -2.5 : 2.5, z);
-    } else if (typeRoll < 0.6) {
+    if (roll < 0.28) {
+      // Choice Split Gates: Left vs Right
+      const isMult = Math.random() < 0.4;
+      const leftVal = isMult ? 2 : Math.floor(4 + Math.random() * 8);
+      placeGate(-2.8, z, isMult ? `x${leftVal}` : `+${leftVal}`, isMult ? 'mult' : 'plus', leftVal);
+
+      // Penalty or smaller gate on right
+      const isPenalty = Math.random() < 0.35;
+      const rightVal = isPenalty ? 4 : 2;
+      placeGate(2.8, z, isPenalty ? `-${rightVal}` : `+${rightVal}`, isPenalty ? 'minus' : 'plus', rightVal);
+    } else if (roll < 0.45) {
       // Enemy formation
-      const enemyCount = Math.min(18, 4 + levelIdx * 2 + Math.floor(Math.random() * 4));
+      const enemyCount = Math.min(22, 4 + levelIdx * 2 + Math.floor(Math.random() * 4));
       placeEnemySquad(laneX, z, enemyCount);
-    } else if (typeRoll < 0.82) {
-      // Hazards
+    } else if (roll < 0.62) {
+      // Swinging Pendulum Trap!
+      const p = makePendulumTrap(laneX, z);
+      scene.add(p.group);
+      pendulums.push(p);
+    } else if (roll < 0.78) {
+      // Road hazard cones
       placeHazard(laneX, z);
+    } else if (roll < 0.88) {
+      // Powerup: Nitro Pad or Shield
+      if (Math.random() < 0.5) placeNitroPad(laneX, z);
+      else placeShieldOrb(laneX, z);
     } else {
-      // Solo troop recruit
-      placeTroopPickup(laneX, z);
+      // Solo troop pickup + coins
+      placeTroopPickup(laneX > 0 ? 2.5 : -2.5, z);
+      placeCoins(laneX > 0 ? -2.5 : 2.5, z);
     }
   }
 }
@@ -772,10 +946,12 @@ function placeGate(x, z, label, type, value) {
   const g = new THREE.Group();
   g.position.set(x, 0, z);
 
-  const gateMat = mat(type === 'mult' ? '#ff9800' : '#00e676', 0.3, 0.4);
-  const frame = box(g, 2.4, 2.8, 0.25, gateMat, 0, 1.4, 0);
+  let gateColor = '#00e676';
+  if (type === 'mult') gateColor = '#ff9800';
+  else if (type === 'minus') gateColor = '#ff1744';
 
-  // Canvas billboard text
+  box(g, 2.5, 2.8, 0.24, mat(gateColor, 0.3, 0.4), 0, 1.4, 0);
+
   const c = document.createElement('canvas');
   c.width = 256; c.height = 128;
   const ctx = c.getContext('2d');
@@ -783,6 +959,7 @@ function placeGate(x, z, label, type, value) {
   ctx.font = 'bold 72px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(label, 128, 86);
+
   const tex = new THREE.CanvasTexture(c);
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
   sprite.scale.set(2.2, 1.1, 1);
@@ -791,6 +968,24 @@ function placeGate(x, z, label, type, value) {
 
   scene.add(g);
   pickups.push({ group: g, x, z, type, value, label, alive: true });
+}
+
+function placeNitroPad(x, z) {
+  const g = new THREE.Group();
+  g.position.set(x, 0.05, z);
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.08, 2.8), mats.nitro);
+  g.add(pad);
+  scene.add(g);
+  pickups.push({ group: g, x, z, type: 'nitro', value: 1, alive: true });
+}
+
+function placeShieldOrb(x, z) {
+  const g = new THREE.Group();
+  g.position.set(x, 0.8, z);
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 12), mats.shield);
+  g.add(orb);
+  scene.add(g);
+  pickups.push({ group: g, x, z, type: 'shield', value: 1, alive: true });
 }
 
 function placeTroopPickup(x, z) {
@@ -840,8 +1035,16 @@ function placeEnemySquad(x, z, count) {
   enemySquads.push({ group: g, x, z, count, max: count, alive: true });
 }
 
+function spawnBossShockwave(z) {
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.15, 8, 32), mats.red2);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.set(0, 0.2, z);
+  scene.add(ring);
+  shockwaves.push({ mesh: ring, z, alive: true });
+}
+
 /* =========================================================================
-   9. CONTROLS & INPUT
+   9. INPUT & CONTROLS
    ========================================================================= */
 const keys = {};
 addEventListener('keydown', e => {
@@ -868,34 +1071,64 @@ addEventListener('pointermove', e => {
 });
 
 /* =========================================================================
-   10. MAIN GAME LOOP & UPDATES
+   10. MAIN LOOP & TICK
    ========================================================================= */
 function update(dt) {
   if (gameState.mode !== 'playing' || gameState.paused) return;
   gameState.elapsed += dt;
 
   const biome = BIOMES[(gameState.currentLevel - 1) % BIOMES.length];
-  const agility = 7.0 + progress.upgrades.speed * 1.5;
+  const agility = 7.2 + progress.upgrades.speed * 1.6;
 
-  // Keyboard navigation
+  // Steering
   if (keys['arrowleft'] || keys['a']) gameState.playerX -= agility * dt;
   if (keys['arrowright'] || keys['d']) gameState.playerX += agility * dt;
   gameState.playerX = THREE.MathUtils.clamp(gameState.playerX, -4.6, 4.6);
 
-  // Army formation & smooth damping
+  // Nitro Boost Handling
+  let speedMultiplier = 1.0;
+  if (gameState.nitroTimer > 0) {
+    gameState.nitroTimer -= dt;
+    speedMultiplier = 1.6;
+    ui.powerupBadge.style.display = 'block';
+    if (gameState.nitroTimer <= 0) ui.powerupBadge.style.display = 'none';
+  }
+
+  const worldSpeed = biome.speed * speedMultiplier;
+
+  // Army smooth follow
   arrangeArmy();
-  army.forEach((soldier, idx) => {
+  army.forEach((soldier) => {
     soldier.group.position.x = THREE.MathUtils.damp(soldier.group.position.x, soldier.targetX, 8, dt);
     soldier.group.position.z = THREE.MathUtils.damp(soldier.group.position.z, soldier.targetZ, 8, dt);
     soldier.group.rotation.y = Math.sin(gameState.elapsed * 6 + soldier.phase) * 0.08;
   });
 
-  const worldSpeed = biome.speed;
-
-  // Move road stripes for illusion of speed
+  // Road stripes animation
   stripes.forEach(s => {
     s.position.z += worldSpeed * dt;
-    if (s.position.z > 25) s.position.z -= 340;
+    if (s.position.z > 25) s.position.z -= 380;
+  });
+
+  // Oscillating Pendulum Traps
+  pendulums.forEach(p => {
+    p.angle += p.speed * dt;
+    p.group.rotation.z = Math.sin(p.angle) * 0.95;
+    p.z += worldSpeed * dt;
+    p.group.position.z = p.z;
+
+    // Hit test with squad
+    if (Math.abs(p.z - 5) < 1.3 && Math.abs(p.x - gameState.playerX) < 1.4) {
+      if (gameState.nitroTimer <= 0) {
+        sfx.sfxHit();
+        gameState.screenShake = 0.35;
+        removeArmy(2);
+        if (army.length <= 1) {
+          gameOver();
+          return;
+        }
+      }
+    }
   });
 
   // Pickups & Gates
@@ -904,6 +1137,7 @@ function update(dt) {
     p.z += worldSpeed * dt;
     p.group.position.z = p.z;
     if (p.type === 'troop') p.group.rotation.y += dt * 2.2;
+    if (p.type === 'shield') p.group.rotation.y += dt * 3;
 
     if (Math.abs(p.z - 5) < 1.4 && Math.abs(p.x - gameState.playerX) < 1.4) {
       p.alive = false;
@@ -912,7 +1146,7 @@ function update(dt) {
         addArmy(1);
         gameState.score += 20;
         sfx.sfxRecruit();
-        showCombo("+1 TROOP!");
+        showCombo("+1 TROOPER!");
       } else if (p.type === 'plus') {
         addArmy(p.value);
         gameState.score += p.value * 25;
@@ -923,19 +1157,31 @@ function update(dt) {
         addArmy(added);
         gameState.score += added * 30;
         sfx.sfxGate();
-        showCombo(`x${p.value} MULTIPLIER!`);
+        showCombo(`x${p.value} SURGE!`);
+      } else if (p.type === 'minus') {
+        removeArmy(p.value);
+        sfx.sfxPenalty();
+        showCombo(`-${p.value} CASUALTIES!`);
+      } else if (p.type === 'nitro') {
+        gameState.nitroTimer = 3.5;
+        sfx.sfxBoost();
+        showCombo("NITRO OVERDRIVE!");
+      } else if (p.type === 'shield') {
+        gameState.hasShield = true;
+        sfx.sfxShield();
+        showCombo("ENERGY SHIELD ACTIVATED!");
       }
     }
     if (p.z > 16) { p.alive = false; scene.remove(p.group); }
   }
 
-  // Gold Coins
+  // Coins
   for (const c of coinsMesh) {
     if (!c.alive) continue;
     c.z += worldSpeed * dt;
     c.mesh.position.z = c.z;
     c.mesh.rotation.z += dt * 3;
-    if (Math.abs(c.z - 5) < 1.2 && Math.abs(c.x - gameState.playerX) < 1.2) {
+    if (Math.abs(c.z - 5) < 1.2 && Math.abs(c.x - gameState.playerX) < 1.3) {
       c.alive = false;
       scene.remove(c.mesh);
       progress.coins += 5;
@@ -954,12 +1200,14 @@ function update(dt) {
     if (Math.abs(h.z - 5) < 1.2 && Math.abs(h.x - gameState.playerX) < 1.3) {
       h.alive = false;
       scene.remove(h.group);
-      sfx.sfxHit();
-      gameState.screenShake = 0.3;
-      removeArmy(2);
-      if (army.length <= 1) {
-        gameOver();
-        return;
+      if (gameState.nitroTimer <= 0) {
+        sfx.sfxHit();
+        gameState.screenShake = 0.3;
+        removeArmy(2);
+        if (army.length <= 1) {
+          gameOver();
+          return;
+        }
       }
     }
     if (h.z > 16) { h.alive = false; scene.remove(h.group); }
@@ -975,7 +1223,7 @@ function update(dt) {
       scene.remove(e.group);
       sfx.sfxHit();
       gameState.screenShake = 0.35;
-      const powerMultiplier = 1 + progress.upgrades.firepower * 0.4;
+      const powerMultiplier = 1 + progress.upgrades.firepower * 0.45;
       const lost = Math.max(1, Math.ceil(e.count / powerMultiplier));
       removeArmy(lost);
       gameState.score += e.max * 40;
@@ -987,7 +1235,26 @@ function update(dt) {
     if (e.z > 16) { e.alive = false; scene.remove(e.group); }
   }
 
-  // Particle Physics
+  // Boss Shockwaves
+  for (let i = shockwaves.length - 1; i >= 0; i--) {
+    const sw = shockwaves[i];
+    sw.z += 12 * dt;
+    sw.mesh.position.z = sw.z;
+    sw.mesh.scale.x += dt * 1.5;
+    sw.mesh.scale.y += dt * 1.5;
+    if (Math.abs(sw.z - 5) < 1.1 && Math.abs(gameState.playerX) < 2.5) {
+      sfx.sfxHit();
+      gameState.screenShake = 0.4;
+      removeArmy(1);
+      scene.remove(sw.mesh);
+      shockwaves.splice(i, 1);
+    } else if (sw.z > 16) {
+      scene.remove(sw.mesh);
+      shockwaves.splice(i, 1);
+    }
+  }
+
+  // Particles
   for (let i = particles.length - 1; i >= 0; i--) {
     const pt = particles[i];
     pt.life -= dt;
@@ -999,23 +1266,27 @@ function update(dt) {
     }
   }
 
-  // Boss Battle Phase
+  // Boss Phase
   if (!gameState.spawnedBoss && gameState.elapsed > gameState.levelDuration) {
     gameState.spawnedBoss = true;
     ui.bossbar.style.display = 'block';
     sfx.sfxBossRoar();
-    gameState.boss = makeBoss(biome.bossScale);
-    gameState.boss.position.set(0, 0, -22);
+    gameState.boss = makeBoss(biome.bossScale, biome.bossType);
+    gameState.boss.position.set(0, 0, -24);
     scene.add(gameState.boss);
   }
 
   if (gameState.boss) {
     gameState.boss.position.z = THREE.MathUtils.damp(gameState.boss.position.z, 2.8, 1.2, dt);
-    gameState.boss.rotation.y = Math.sin(gameState.elapsed * 1.8) * 0.09;
+    gameState.boss.rotation.y = Math.sin(gameState.elapsed * 1.8) * 0.1;
 
-    // Squad automatic laser fire
+    // Boss shockwave attack periodic release
+    if (Math.random() < dt * 0.45 && gameState.boss.position.z > -10) {
+      spawnBossShockwave(gameState.boss.position.z);
+    }
+
     if (gameState.boss.position.z > 0.5) {
-      const dps = (8 + army.length * 3.2) * (1 + progress.upgrades.firepower * 0.5);
+      const dps = (8 + army.length * 3.4) * (1 + progress.upgrades.firepower * 0.5);
       gameState.bossHP -= dt * dps;
       ui.bossfill.style.width = Math.max(0, (gameState.bossHP / gameState.bossMaxHP) * 100) + '%';
 
@@ -1023,7 +1294,7 @@ function update(dt) {
         const soldier = army[Math.floor(Math.random() * army.length)];
         if (soldier) {
           sfx.sfxLaser();
-          spawnDeathParticles(gameState.boss.position.x + (Math.random()-0.5)*1.5, 2.5, gameState.boss.position.z, '#ffca28');
+          spawnDeathParticles(gameState.boss.position.x + (Math.random()-0.5)*1.8, 2.6, gameState.boss.position.z, '#ffca28', 4);
         }
       }
     }
@@ -1047,13 +1318,12 @@ function update(dt) {
   }
   camera.lookAt(gameState.playerX * 0.16, 1.2, -6);
 
-  // HUD
   ui.count.textContent = army.length;
   ui.bar.style.width = Math.min(100, (gameState.elapsed / gameState.levelDuration) * 100) + '%';
 }
 
 /* =========================================================================
-   11. GAME STATE TRANSITIONS
+   11. STATE TRANSITIONS & MENUS
    ========================================================================= */
 function startLevel(lvl) {
   sfx.init();
@@ -1061,6 +1331,7 @@ function startLevel(lvl) {
   gameState.mode = 'playing';
   gameState.score = 0;
   ui.overlay.style.display = 'none';
+  ui.levelModal.style.display = 'none';
   ui.bossbar.style.display = 'none';
   buildLevel(lvl);
 }
@@ -1073,14 +1344,14 @@ function gameOver() {
   showModal(
     'SQUAD DEFEATED',
     `Zone ${gameState.currentLevel} Overwhelmed`,
-    'Your troops were taken down. Spend your gold coins in the Armory below to increase your squad size and firepower!',
+    'Your army fell in combat. Use your earned coins to upgrade your squad below before your next assault!',
     'RETRY MISSION'
   );
 }
 
 function levelCleared() {
   gameState.mode = 'won';
-  const reward = gameState.currentLevel * 30;
+  const reward = gameState.currentLevel * 35;
   progress.coins += reward;
   if (gameState.currentLevel >= progress.maxLevel && progress.maxLevel < BIOMES.length) {
     progress.maxLevel = gameState.currentLevel + 1;
@@ -1091,16 +1362,16 @@ function levelCleared() {
 
   if (gameState.currentLevel < BIOMES.length) {
     showModal(
-      'VICTORY!',
+      'VICTORY! 🏆',
       `Zone ${gameState.currentLevel} Conquered (+🪙${reward})`,
-      `Awesome command! Ready to advance into ${BIOMES[gameState.currentLevel].name}? Upgrade your squad before proceeding.`,
-      'NEXT ZONE'
+      `Outstanding tactical command! Prepare your squad for the next theater of war: ${BIOMES[gameState.currentLevel].name}.`,
+      'ADVANCE TO NEXT ZONE'
     );
   } else {
     showModal(
-      'CAMPAIGN COMPLETE! 🏆',
-      `All 5 Zones Liberated (+🪙${reward})`,
-      `Incredible victory! You conquered the Galactic Emperor. Play again to climb the global leaderboard.`,
+      'GALACTIC CONQUEROR! 👑',
+      `All 10 Zones Liberated (+🪙${reward})`,
+      `Legendary! You defeated the Galactic Sovereign and conquered all 10 battle zones. Replay any zone to master your score!`,
       'PLAY AGAIN'
     );
   }
@@ -1116,7 +1387,7 @@ function showModal(title, subtitle, desc, btnText) {
 }
 
 /* =========================================================================
-   12. ARMORY UPGRADES LOGIC
+   12. ARMORY & LEVEL SELECT MODAL LOGIC
    ========================================================================= */
 function renderUpgrades() {
   const up = progress.upgrades;
@@ -1135,6 +1406,23 @@ function renderUpgrades() {
   document.querySelector('#valSpeed').textContent = `Lv ${up.speed}`;
   document.querySelector('#costSpeed').textContent = `🪙 ${costSpeed}`;
   document.querySelector('#upSpeed').classList.toggle('disabled', progress.coins < costSpeed);
+}
+
+function renderLevelGrid() {
+  ui.levelButtons.innerHTML = '';
+  BIOMES.forEach(b => {
+    const btn = document.createElement('div');
+    const isUnlocked = b.id <= progress.maxLevel;
+    const isCurrent = b.id === gameState.currentLevel;
+    btn.className = `lvl-btn ${isCurrent ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`;
+    btn.innerHTML = `${b.id}<br><span style="font-size:9px;font-weight:600">${isUnlocked ? 'ZONE' : '🔒'}</span>`;
+    if (isUnlocked) {
+      btn.addEventListener('click', () => {
+        startLevel(b.id);
+      });
+    }
+    ui.levelButtons.appendChild(btn);
+  });
 }
 
 document.querySelector('#upStart').addEventListener('click', () => {
@@ -1176,6 +1464,20 @@ ui.mAction.addEventListener('click', () => {
   }
 });
 
+ui.levelSelectBtn.addEventListener('click', () => {
+  renderLevelGrid();
+  ui.levelModal.style.display = 'flex';
+});
+
+ui.mZoneSelect.addEventListener('click', () => {
+  renderLevelGrid();
+  ui.levelModal.style.display = 'flex';
+});
+
+ui.closeLevelModal.addEventListener('click', () => {
+  ui.levelModal.style.display = 'none';
+});
+
 /* =========================================================================
    13. INITIALIZATION & ANIMATION LOOP
    ========================================================================= */
@@ -1189,14 +1491,12 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 
-// Window resize
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
 
-// Initialize SDK and initial UI
 saveState();
 Playables.init();
 Playables.onGameReady();
