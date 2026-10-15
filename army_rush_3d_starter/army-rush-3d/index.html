@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Army Rush 3D</title>
+<style>
+  :root{color-scheme:dark}
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101729;font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}
+  #game{position:fixed;inset:0}
+  canvas{display:block}
+  #hud{position:fixed;inset:0;pointer-events:none;color:white}
+  .top{display:flex;justify-content:space-between;gap:10px;padding:16px}
+  .pill{background:rgba(10,18,35,.76);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px 14px;box-shadow:0 8px 24px #0003;backdrop-filter:blur(8px)}
+  .label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b7c9e8}
+  .value{font-size:24px;font-weight:900;line-height:1.1;margin-top:2px}
+  #progressWrap{position:absolute;left:50%;top:18px;transform:translateX(-50%);width:min(38vw,360px);text-align:center}
+  #progress{height:9px;border-radius:99px;background:#ffffff28;overflow:hidden;margin-top:7px}
+  #bar{height:100%;width:0;background:linear-gradient(90deg,#38e8bd,#a4ff70);transition:width .15s}
+  #bossbar{display:none;position:absolute;top:100px;left:50%;transform:translateX(-50%);width:min(70vw,520px);text-align:center}
+  #bossfill{height:12px;background:#ff3e5e;width:100%;border-radius:99px}
+  #bossbg{background:#ffffff32;border-radius:99px;overflow:hidden;margin-top:6px}
+  #message{position:absolute;top:25%;left:50%;transform:translateX(-50%);width:min(90vw,680px);text-align:center;text-shadow:0 4px 22px #000;display:none}
+  #message h1{font-size:clamp(34px,7vw,72px);line-height:1;margin:0 0 12px;font-weight:1000;letter-spacing:-.04em}
+  #message p{font-size:clamp(14px,2vw,19px);color:#e2ebff;margin:8px auto;max-width:560px}
+  #action{pointer-events:auto;border:0;border-radius:999px;padding:15px 28px;background:linear-gradient(135deg,#8bff70,#36e8bb);font-size:16px;font-weight:900;color:#0b1a25;cursor:pointer;margin-top:15px;box-shadow:0 8px 0 #168d7a}
+  #hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;color:#dce8ff;background:#091326b8;border:1px solid #ffffff1e;padding:9px 14px;border-radius:999px}
+  #mobileHelp{display:none}
+  @media(max-width:650px){.top{padding:10px}.pill{padding:8px 10px}.value{font-size:20px}#progressWrap{top:82px;width:58vw}#bossbar{top:126px}#hint{bottom:10px;font-size:10px}#message{top:29%}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud">
+  <div class="top">
+    <div class="pill"><div class="label">Your army</div><div class="value">⚔️ <span id="count">1</span></div></div>
+    <div id="progressWrap" class="pill"><div class="label" id="stage">BATTLEFIELD • 1</div><div id="progress"><div id="bar"></div></div></div>
+    <div class="pill"><div class="label">Power</div><div class="value">✦ <span id="power">1</span></div></div>
+  </div>
+  <div id="bossbar"><div class="label">FINAL BOSS • WARLORD</div><div id="bossbg"><div id="bossfill"></div></div></div>
+  <div id="message"><h1 id="title">ARMY RUSH 3D</h1><p id="desc">Collect soldiers. Build your army. Crush the enemy warlord.</p><p id="sub">Move with A / D or ← / →. On mobile, drag left or right.</p><button id="action">START MISSION</button></div>
+  <div id="hint">A / D or ← → to move · Drag on mobile · Collect blue troops · Avoid red hazards</div>
+</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const root=document.querySelector('#game');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color('#9bc9e9');
+scene.fog=new THREE.Fog('#9bc9e9',35,155);
+const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,250);
+camera.position.set(0,8,13);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.18;
+root.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xe5f5ff,0x4b624b,2.0));
+const sun=new THREE.DirectionalLight(0xfff0d5,3.2);sun.position.set(-8,18,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-24;sun.shadow.camera.right=24;sun.shadow.camera.top=30;sun.shadow.camera.bottom=-30;scene.add(sun);
+
+const mat=(color,roughness=.78,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+const mats={
+ grass:mat('#6f9d54'),lane:mat('#c8b78c'),edge:mat('#5a754a'),stripe:mat('#f3e9c7'),
+ blue:mat('#168bff'),blue2:mat('#72d3ff'),skin:mat('#f2bd91'),dark:mat('#20334c'),
+ pants:mat('#273d5b'),red:mat('#d93c4e'),red2:mat('#ff6b6b'),gold:mat('#ffcf56',.4,.35),
+ steel:mat('#aab9c9',.35,.65),boss:mat('#66213c'),black:mat('#202a38'),
+ tree:mat('#326d48'),leaf:mat('#58a66a'),rock:mat('#73818c')
+};
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,260),mats.grass);floor.rotation.x=-Math.PI/2;floor.position.set(0,-.16,-95);floor.receiveShadow=true;scene.add(floor);
+const road=new THREE.Mesh(new THREE.PlaneGeometry(12,250),mats.lane);road.rotation.x=-Math.PI/2;road.position.set(0,-.12,-95);road.receiveShadow=true;scene.add(road);
+for(const x of [-6.15,6.15]){const e=new THREE.Mesh(new THREE.BoxGeometry(.28,.18,250),mats.edge);e.position.set(x,-.02,-95);scene.add(e)}
+for(let z=25;z>-215;z-=10){const s=new THREE.Mesh(new THREE.BoxGeometry(.12,.025,4),mats.stripe);s.position.set(0,.005,z);scene.add(s)}
+// roadside trees and rocks
+for(let i=0;i<74;i++){
+ const z=18-Math.random()*225,side=Math.random()<.5?-1:1,x=side*(8+Math.random()*12);
+ if(Math.random()<.7){
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.16,.24,1.7,7),mat('#73543a'));trunk.position.set(x,.7,z);trunk.castShadow=true;scene.add(trunk);
+  const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(.9+Math.random()*.55,1),mats.tree);crown.position.set(x,1.9,z);crown.castShadow=true;scene.add(crown);
+  const crown2=new THREE.Mesh(new THREE.IcosahedronGeometry(.6,1),mats.leaf);crown2.position.set(x+.3,2.3,z+.1);scene.add(crown2);
+ }else{
+  const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.5+Math.random()*.7,0),mats.rock);rock.position.set(x,.2,z);rock.rotation.set(Math.random(),Math.random(),Math.random());rock.castShadow=true;scene.add(rock);
+ }
+}
+function box(parent,w,h,d,material,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function sphere(parent,r,material,x,y,z){const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),material);m.position.set(x,y,z);m.castShadow=true;parent.add(m);return m}
+function makeSoldier(team='blue',scale=1){
+ const g=new THREE.Group();g.scale.setScalar(scale);
+ const shirt=team==='blue'?mats.blue:mats.red, legs=team==='blue'?mats.pants:mats.boss;
+ box(g,.58,.65,.34,shirt,0,1.08,0);
+ sphere(g,.25,mats.skin,0,1.62,0);
+ // helmet
+ const helmet=new THREE.Mesh(new THREE.SphereGeometry(.28,12,8,0,Math.PI*2,0,Math.PI*.58),team==='blue'?mats.blue2:mats.red2);helmet.position.y=1.78;helmet.castShadow=true;g.add(helmet);
+ box(g,.2,.58,.22,legs,-.17,.45,0);box(g,.2,.58,.22,legs,.17,.45,0);
+ box(g,.18,.5,.2,shirt,-.39,1.1,0);box(g,.18,.5,.2,shirt,.39,1.1,0);
+ // rifle
+ box(g,.12,.12,.72,mats.dark,.45,1.03,-.22);box(g,.09,.09,.24,mats.gold,.45,1.03,-.57);
+ return g;
+}
+function makeBoss(){
+ const g=new THREE.Group();
+ box(g,2.5,2.7,1.5,mats.boss,0,2.1,0);
+ sphere(g,.78,mats.red2,0,4,0);
+ // horns
+ const hornGeo=new THREE.ConeGeometry(.25,.85,8);
+ for(const x of [-.55,.55]){const h=new THREE.Mesh(hornGeo,mats.gold);h.position.set(x,4.75,0);h.rotation.z=x<0?.45:-.45;h.castShadow=true;g.add(h)}
+ box(g,.45,1.3,.5,mats.boss,-1.65,2,0);box(g,.45,1.3,.5,mats.boss,1.65,2,0);
+ box(g,.65,.22,.5,mats.gold,0,3.3,.82);
+ const club=new THREE.Mesh(new THREE.CylinderGeometry(.18,.28,2.8,8),mats.steel);club.position.set(2.1,2.1,.1);club.rotation.z=-.35;club.castShadow=true;g.add(club);
+ return g;
+}
+let army=[],pickups=[],hazards=[],enemyGroups=[],decor=[],boss=null;
+let mode='menu',score=0,coins=0,world=0,playerX=0,elapsed=0,bossHP=100,spawnedBoss=false,last=0;
+const ui={count:document.querySelector('#count'),power:document.querySelector('#power'),bar:document.querySelector('#bar'),stage:document.querySelector('#stage'),message:document.querySelector('#message'),title:document.querySelector('#title'),desc:document.querySelector('#desc'),sub:document.querySelector('#sub'),action:document.querySelector('#action'),bossbar:document.querySelector('#bossbar'),bossfill:document.querySelector('#bossfill')};
+function clearGroup(arr){for(const o of arr){scene.remove(o.group||o);if(o.group){o.group.traverse(c=>{if(c.geometry)c.geometry.dispose()})}}arr.length=0}
+function clearMission(){clearGroup(army);clearGroup(pickups);clearGroup(hazards);clearGroup(enemyGroups);if(boss){scene.remove(boss);boss=null}spawnedBoss=false}
+function addArmy(n=1){
+ for(let i=0;i<n;i++){
+  const s=makeSoldier('blue',.72);scene.add(s);army.push({group:s,x:0,z:0,phase:Math.random()*6});
+ }
+ arrangeArmy();
+}
+function arrangeArmy(){
+ army.forEach((a,i)=>{
+  if(i===0){a.x=playerX;a.z=5;return}
+  const row=Math.ceil(i/5),col=(i-1)%5;
+  a.x=playerX+(col-2)*1.05;
+  a.z=4+row*1.2;
+ });
+}
+function placePickup(x,z,n,type='troop'){
+ const g=new THREE.Group();g.position.set(x,.2,z);
+ if(type==='troop'){const ring=new THREE.Mesh(new THREE.TorusGeometry(.55,.07,8,22),mats.gold);ring.rotation.x=Math.PI/2;ring.position.y=.06;g.add(ring);const s=makeSoldier('blue',.52);s.position.y=.12;g.add(s)}
+ else {const gate=box(g,1.5,1.7,.3,mats.blue2,0,.85,0);gate.material=mat(type==='plus'?'#39d98a':'#ffad45');textBillboard(g,type==='plus'?`+${n}`:`-${n}`)}
+ scene.add(g);pickups.push({group:g,x,z,n,type,alive:true});
+}
+function textBillboard(g,t){
+ const c=document.createElement('canvas');c.width=256;c.height=128;const cx=c.getContext('2d');
+ cx.fillStyle='#fff';cx.font='bold 62px system-ui';cx.textAlign='center';cx.fillText(t,128,80);
+ const tex=new THREE.CanvasTexture(c);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));sp.scale.set(1.6,.8,1);sp.position.y=2;g.add(sp);
+}
+function placeHazard(x,z){const g=new THREE.Group();g.position.set(x,0,z);const cone=new THREE.Mesh(new THREE.ConeGeometry(.65,1.4,6),mats.red2);cone.position.y=.7;cone.castShadow=true;g.add(cone);const base=new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,.15,10),mats.dark);base.position.y=.08;g.add(base);scene.add(g);hazards.push({group:g,x,z,alive:true})}
+function placeEnemy(x,z,n=3){
+ const g=new THREE.Group();for(let i=0;i<n;i++){const s=makeSoldier('red',.65);s.position.set((i-(n-1)/2)*1.05,0,(Math.floor(i/3))*-.7);g.add(s)}
+ g.position.set(x,0,z);scene.add(g);enemyGroups.push({group:g,x,z,hp:n*2,max:n*2,alive:true});
+}
+function buildLevel(){
+ clearMission();world=0;score=0;coins=0;playerX=0;elapsed=0;bossHP=100;addArmy(1);
+ // objects are laid out down the road, in front of the player
+ placePickup(-3.4,-12,1);placePickup(2.9,-20,1);placePickup(0,-31,1);
+ placePickup(-3.5,-40,5,'plus');placePickup(3.5,-48,4,'plus');
+ placeHazard(0,-25);placeHazard(-2,-56);placeHazard(2.5,-67);
+ placeEnemy(0,-73,4);placePickup(0,-84,1);placePickup(-3,-93,1);
+ placePickup(0,-105,8,'plus');placeHazard(3,-113);placeEnemy(-1,-125,7);
+ placePickup(3,-137,1);placePickup(-3,-145,1);placePickup(0,-154,12,'plus');
+ placeHazard(-1,-165);placeEnemy(0,-178,10);
+}
+function start(){buildLevel();mode='playing';ui.message.style.display='none';ui.bossbar.style.display='none';}
+ui.action.addEventListener('click',()=>{if(mode==='menu'||mode==='over'||mode==='won')start()});
+function showMessage(title,desc,sub,button){ui.title.textContent=title;ui.desc.textContent=desc;ui.sub.textContent=sub;ui.action.textContent=button;ui.message.style.display='block'}
+showMessage('ARMY RUSH 3D','Collect soldiers. Build your army. Crush the enemy warlord.','Move with A / D or ← / →. On mobile, drag left or right.','START MISSION');
+
+const keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(['ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault()});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+let dragging=false,prevPointer=0;
+renderer.domElement.addEventListener('pointerdown',e=>{dragging=true;prevPointer=e.clientX});
+renderer.domElement.addEventListener('pointerup',()=>dragging=false);
+renderer.domElement.addEventListener('pointercancel',()=>dragging=false);
+renderer.domElement.addEventListener('pointermove',e=>{if(dragging&&mode==='playing'){const dx=(e.clientX-prevPointer)/innerWidth*18;playerX=THREE.MathUtils.clamp(playerX+dx,-4.5,4.5);prevPointer=e.clientX}});
+
+function updateArmy(dt){
+ arrangeArmy();
+ army.forEach((a,i)=>{
+  const targetX=i===0?playerX:playerX+((i-1)%5-2)*.95;
+  const targetZ=i===0?5:4+Math.ceil(i/5)*1.0;
+  a.group.position.x=THREE.MathUtils.damp(a.group.position.x,targetX,8,dt);
+  a.group.position.z=THREE.MathUtils.damp(a.group.position.z,targetZ,8,dt);
+  a.group.rotation.y=Math.sin(elapsed*5+a.phase)*.07;
+ });
+}
+function update(dt){
+ if(mode!=='playing')return;
+ elapsed+=dt;
+ if(keys['arrowleft']||keys['a'])playerX-=7*dt;
+ if(keys['arrowright']||keys['d'])playerX+=7*dt;
+ playerX=THREE.MathUtils.clamp(playerX,-4.6,4.6);
+ // Move world toward player to simulate forward running
+ const speed=8.5;
+ for(const p of pickups){if(!p.alive){continue}p.z+=speed*dt;p.group.position.z=p.z;p.group.rotation.y+=dt*1.6;
+  if(Math.abs(p.z-5)<1.4&&Math.abs(p.x-playerX)<1.4){
+   p.alive=false;scene.remove(p.group);
+   if(p.type==='troop'){addArmy(1);score+=10}else if(p.type==='plus'){addArmy(p.n);score+=p.n*10}else{army.splice(Math.max(1,army.length-p.n),p.n).forEach(a=>scene.remove(a.group))}
+  }
+  if(p.z>14){p.alive=false;scene.remove(p.group)}
+ }
+ for(const h of hazards){if(!h.alive)continue;h.z+=speed*dt;h.group.position.z=h.z;
+  if(Math.abs(h.z-5)<1.1&&Math.abs(h.x-playerX)<1.25){h.alive=false;scene.remove(h.group);if(army.length>1){const a=army.pop();scene.remove(a.group)}else{score=Math.max(0,score-20)}}
+  if(h.z>14){h.alive=false;scene.remove(h.group)}
+ }
+ for(const e of enemyGroups){if(!e.alive)continue;e.z+=speed*dt*.9;e.group.position.z=e.z;
+  if(Math.abs(e.z-5)<2.0){e.alive=false;scene.remove(e.group);const lost=Math.min(Math.max(0,army.length-1),Math.ceil(e.hp/3));for(let i=0;i<lost;i++){const a=army.pop();if(a)scene.remove(a.group)}score+=e.max*5;if(army.length<=1&&e.hp>army.length*2){mode='over';showMessage('ARMY DEFEATED','Your squad was overwhelmed. Recruit more troops and try again.','Tip: collect the green + gates before the enemy formations.','RETRY MISSION')}}
+  if(e.z>14){e.alive=false;scene.remove(e.group)}
+ }
+ // boss entrance after army reaches the end
+ if(!spawnedBoss && elapsed>19){
+  spawnedBoss=true;ui.bossbar.style.display='block';
+  boss=makeBoss();boss.position.set(0,0,-18);scene.add(boss);
+ }
+ if(boss){
+  boss.position.z=THREE.MathUtils.damp(boss.position.z,3,1.2,dt);
+  boss.rotation.y=Math.sin(elapsed*1.4)*.08;
+  // Squad automatically attacks the boss when close
+  if(boss.position.z>1.5){bossHP-=dt*(7+army.length*2.6);ui.bossfill.style.width=Math.max(0,bossHP)+'%';
+   if(Math.random()<dt*3){const a=army[Math.floor(Math.random()*army.length)];if(a){const bolt=new THREE.Mesh(new THREE.SphereGeometry(.08,6,6),mats.gold);bolt.position.set(a.group.position.x,1.2,4);scene.add(bolt);decor.push({obj:bolt,life:.22})}}
+  }
+  if(bossHP<=0){scene.remove(boss);boss=null;mode='won';ui.bossbar.style.display='none';score+=500;showMessage('BOSS DEFEATED!','Your army conquered the battlefield. Final score: '+score,'Victory! Next we can add real animations, upgrades, and multiple levels.','PLAY AGAIN')}
+ }
+ for(let i=decor.length-1;i>=0;i--){decor[i].life-=dt;if(decor[i].life<=0){scene.remove(decor[i].obj);decor.splice(i,1)}}
+ // camera follows player with smooth motion
+ camera.position.x=THREE.MathUtils.damp(camera.position.x,playerX*.35,2.5,dt);
+ camera.lookAt(playerX*.18,1,-7);
+ // keep the squad at bottom and scroll scene
+ updateArmy(dt);
+ ui.count.textContent=army.length;ui.power.textContent=Math.max(1,Math.floor(army.length*1.4));
+ ui.bar.style.width=Math.min(100,elapsed/20*100)+'%';
+ ui.stage.textContent=spawnedBoss?'FINAL BOSS':'BATTLEFIELD • '+(Math.floor(elapsed/5)+1);
+}
+function animate(t){const dt=Math.min((t-last)/1000||0,.04);last=t;update(dt);renderer.render(scene,camera);requestAnimationFrame(animate)}
+requestAnimationFrame(animate);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body>
+</html>
