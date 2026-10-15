@@ -15,7 +15,7 @@
     --gold: #ffcf40;
     --gold-glow: rgba(255,207,64,0.5);
     --neon-blue: #00f2fe;
-    --bg-dark: rgba(10, 16, 30, 0.92);
+    --bg-dark: rgba(10, 16, 30, 0.94);
     --border: rgba(255, 255, 255, 0.16);
     color-scheme: dark;
   }
@@ -86,20 +86,20 @@
 
   /* Overlays / Modals */
   .modal-overlay{
-    position:absolute;inset:0;background:rgba(4,7,18,0.88);backdrop-filter:blur(14px);
+    position:absolute;inset:0;background:rgba(3,6,15,0.92);backdrop-filter:blur(16px);
     display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:50;
   }
   .card{
-    background:linear-gradient(180deg,#15203d,#0d1428);border:1px solid rgba(255,255,255,0.18);
-    border-radius:24px;padding:26px 22px;width:min(92vw,500px);text-align:center;
-    box-shadow:0 24px 70px rgba(0,0,0,0.7);max-height:92vh;overflow-y:auto;
+    background:linear-gradient(180deg,#14203a,#0c1326);border:1px solid rgba(255,255,255,0.18);
+    border-radius:24px;padding:26px 22px;width:min(92vw,520px);text-align:center;
+    box-shadow:0 24px 70px rgba(0,0,0,0.75);max-height:92vh;overflow-y:auto;
   }
-  .card h1{font-size:clamp(26px,5.5vw,40px);line-height:1;margin:0 0 6px;font-weight:900;letter-spacing:-0.03em;color:#fff}
+  .card h1{font-size:clamp(26px,5.5vw,38px);line-height:1.1;margin:0 0 6px;font-weight:900;letter-spacing:-0.03em;color:#fff}
   .card h2{font-size:15px;color:#a0b4d6;margin:0 0 14px;font-weight:600}
   .card p{font-size:14px;color:#c9d7f0;margin:8px 0 18px;line-height:1.55}
   
   .btn{
-    border:0;border-radius:999px;padding:14px 32px;
+    border:0;border-radius:999px;padding:14px 30px;
     background:linear-gradient(135deg,#38ef7d,#11998e);
     font-size:15px;font-weight:900;color:#07211a;cursor:pointer;
     box-shadow:0 8px 24px rgba(56,239,125,0.4);transition:transform 0.15s, box-shadow 0.15s;
@@ -112,25 +112,48 @@
   }
   .btn.secondary:hover{background:rgba(255,255,255,0.2)}
   .btn.royal{
-    background:linear-gradient(135deg,#ffd700,#ff8c00);color:#241200;box-shadow:0 8px 24px rgba(255,180,0,0.45);
+    background:linear-gradient(135deg,#ffd700,#ff8c00);color:#221000;box-shadow:0 8px 24px rgba(255,180,0,0.5);
   }
   
-  /* Input Fields */
+  /* Inputs */
   .royal-input{
     width:100%;padding:14px 18px;border-radius:14px;border:2px solid var(--gold);
-    background:rgba(0,0,0,0.4);color:#fff;font-size:18px;font-weight:700;
+    background:rgba(0,0,0,0.5);color:#fff;font-size:18px;font-weight:700;
     text-align:center;outline:none;box-shadow:0 0 20px rgba(255,207,64,0.25);margin:14px 0 20px;
   }
   .royal-input:focus{border-color:#fff;box-shadow:0 0 25px rgba(255,255,255,0.4)}
 
-  /* Story Scene Box */
-  .story-box{
-    background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.1);
-    border-radius:18px;padding:20px 16px;margin:16px 0;min-height:160px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  /* ========================================================
+     CINEMATIC VIDEO STORY THEATER
+     ======================================================== */
+  .cinema-card{
+    width:min(96vw, 680px);padding:20px;background:#090d1a;border:1px solid rgba(255,207,64,0.3);
+    box-shadow:0 0 80px rgba(0,0,0,0.9);
   }
-  .story-icon{font-size:54px;margin-bottom:12px;filter:drop-shadow(0 0 16px rgba(255,207,64,0.6))}
-  .story-text{font-size:15px;line-height:1.6;color:#e1ebfd;font-weight:500;min-height:75px}
+  .cinema-screen{
+    width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;
+    position:relative;background:#000;box-shadow:0 12px 36px rgba(0,0,0,0.8);
+    border:1px solid rgba(255,255,255,0.12);
+  }
+  #cinemaCanvas{width:100%;height:100%;display:block}
+  .subtitles-bar{
+    position:absolute;bottom:0;left:0;right:0;padding:14px 20px;
+    background:linear-gradient(0deg,rgba(0,0,0,0.95),rgba(0,0,0,0.7) 70%,transparent);
+    text-align:center;pointer-events:none;
+  }
+  .subtitle-text{
+    font-size:clamp(13px,2.2vw,18px);font-weight:700;color:#fff;
+    text-shadow:0 2px 10px #000, 0 0 20px rgba(255,207,64,0.4);line-height:1.45;
+  }
+  .voice-indicator{
+    position:absolute;top:12px;left:14px;background:rgba(0,0,0,0.65);
+    border:1px solid rgba(255,255,255,0.15);padding:4px 10px;border-radius:999px;
+    font-size:11px;font-weight:800;color:var(--gold);display:flex;align-items:center;gap:6px;
+  }
+  .cinema-progress{height:4px;background:rgba(255,255,255,0.15);width:100%;margin-top:12px;border-radius:99px;overflow:hidden}
+  .cinema-progress-fill{height:100%;background:linear-gradient(90deg,#ff9900,#ffcf40);width:0%;transition:width 0.1s linear}
+  
+  .cinema-controls{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
 
   /* Upgrades Grid */
   .upgrades-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0;text-align:left}
@@ -144,7 +167,7 @@
   .up-item .up-cost{font-size:11px;color:var(--gold);font-weight:700}
   .up-item.disabled{opacity:0.35;pointer-events:none}
 
-  /* Campaign Map Visual */
+  /* Campaign Map */
   .campaign-map{
     background:radial-gradient(ellipse at center,#172545,#0b1124);
     border:1px solid rgba(255,207,64,0.3);border-radius:18px;
@@ -166,7 +189,6 @@
     box-shadow:0 0 20px rgba(255,207,64,0.4);
   }
 
-  /* Controls Hint */
   #controlsHint{
     padding:10px;text-align:center;font-size:12px;color:rgba(255,255,255,0.7);
     background:rgba(4,7,18,0.7);backdrop-filter:blur(6px);border-top:1px solid rgba(255,255,255,0.08);
@@ -174,11 +196,12 @@
   
   @media(max-width:650px){
     .top-bar{padding:8px}
-    .pill{padding:5px 8px;min-width:52px}
+    .pill{padding:5px 8px;min-width:50px}
     .value{font-size:16px}
     #progressWrap{top:66px;width:72vw}
     #bossbar{top:114px;width:90vw}
     .card{padding:18px 14px}
+    .cinema-card{padding:14px}
     .upgrades-grid{grid-template-columns:1fr 1fr 1fr;gap:6px}
   }
 </style>
@@ -205,6 +228,10 @@
       <div class="pill">
         <div class="label">Coins</div>
         <div class="value">🪙 <span id="coins">0</span></div>
+      </div>
+      <div class="pill clickable" id="storyBtn" title="Watch Story Prologue">
+        <div class="label">Story</div>
+        <div class="value">🎬</div>
       </div>
       <div class="pill clickable" id="mapBtn" title="Reclamation Map">
         <div class="label">Map</div>
@@ -239,37 +266,54 @@
   </div>
 </div>
 
-<!-- 1. NAME REGISTRATION MODAL -->
-<div id="nameModal" class="modal-overlay" style="display:none">
+<!-- ========================================================
+     MODAL 1: KING NAME REGISTRATION
+     ======================================================== -->
+<div id="nameModal" class="modal-overlay" style="display:flex">
   <div class="card">
     <div style="font-size:52px;margin-bottom:6px">👑</div>
-    <h1>NAME YOUR KING</h1>
-    <h2>Reclaim Your Stolen Throne</h2>
-    <p>Your peaceful kingdom was conquered in a catastrophic war and you were banished to the far frontier. Enter your royal name to lead the vengeance march:</p>
-    <input type="text" id="kingNameInput" class="royal-input" maxlength="18" value="Bijon" placeholder="Your Royal Name">
-    <button class="btn royal" id="btnCrown">CROWN ME & BEGIN SAGA</button>
+    <h1>WHAT IS YOUR NAME, KING?</h1>
+    <h2>Reclaim Your Stolen Empire</h2>
+    <p>Your peaceful kingdom was conquered by 10 dark warlords and you were banished to the far frontier. Enter your royal name to begin your saga:</p>
+    <input type="text" id="kingNameInput" class="royal-input" maxlength="16" value="Bijon" placeholder="Enter King Name">
+    <button class="btn royal" id="btnCrown">👑 ENTER & WATCH SAGA</button>
   </div>
 </div>
 
-<!-- 2. ANIMATED PROLOGUE STORY MODAL -->
-<div id="storyModal" class="modal-overlay" style="display:none">
-  <div class="card">
-    <h1 id="storyChapterTitle">PROLOGUE</h1>
-    <h2 id="storyChapterSub">CHAPTER I: THE GOLDEN EMPIRE</h2>
-    
-    <div class="story-box">
-      <div class="story-icon" id="storyIcon">🏰</div>
-      <div class="story-text" id="storyText">Loading tale of the realm...</div>
+<!-- ========================================================
+     MODAL 2: CINEMATIC VIDEO-LIKE IMAGE STORY WITH VOICEOVER
+     ======================================================== -->
+<div id="cinemaModal" class="modal-overlay" style="display:none">
+  <div class="card cinema-card">
+    <div class="cinema-screen">
+      <canvas id="cinemaCanvas" width="800" height="450"></canvas>
+      <div class="voice-indicator">
+        <span>🎙️ NARRATOR ACTIVE</span>
+      </div>
+      <div class="subtitles-bar">
+        <div class="subtitle-text" id="subtitles">Loading story prologue...</div>
+      </div>
     </div>
-    
-    <div style="display:flex;justify-content:center;gap:8px">
-      <button class="btn secondary" id="btnSkipStory">SKIP INTRO</button>
-      <button class="btn royal" id="btnNextStory">CONTINUE >></button>
+
+    <div class="cinema-progress">
+      <div class="cinema-progress-fill" id="cinemaBar"></div>
+    </div>
+
+    <div class="cinema-controls">
+      <div>
+        <span style="font-size:12px;font-weight:800;color:#ffcf40" id="cinemaChapterName">SCENE 1 OF 4</span>
+      </div>
+      <div>
+        <button class="btn secondary" id="btnSkipCinema">SKIP SAGA ⏭️</button>
+        <button class="btn royal" id="btnNextCinema">NEXT SCENE ⏩</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- 3. CAMPAIGN MAP MODAL -->
+<!-- ========================================================
+     MODAL 3: CAMPAIGN MAP MODAL
+     ======================================================== -->
 <div id="mapModal" class="modal-overlay" style="display:none">
   <div class="card">
     <h1>CAMPAIGN MAP</h1>
@@ -292,10 +336,12 @@
   </div>
 </div>
 
-<!-- 4. MAIN ACTION MODAL (Menu, Upgrades, Victory, Defeat) -->
+<!-- ========================================================
+     MODAL 4: MAIN ARMORY & ACTION MODAL
+     ======================================================== -->
 <div id="modalOverlay" class="modal-overlay" style="display:none">
   <div class="card" id="modalCard">
-    <h1 id="mTitle">ARMY RUSH 3D</h1>
+    <h1 id="mTitle">KING BIJON'S ARMY</h1>
     <h2 id="mSubtitle">The King's Reclamation</h2>
     <p id="mDesc">Collect blue troopers, pass through multiplier gates, avoid swinging pendulums, and crush the warlords across all 10 battle zones!</p>
     
@@ -319,7 +365,7 @@
     </div>
 
     <div>
-      <button class="btn royal" id="mAction">MARCH FORWARD</button>
+      <button class="btn royal" id="mAction">MARCH TO ZONE 1 ⚔️</button>
       <button class="btn secondary" id="mOpenMap">VIEW MAP (10 ZONES)</button>
     </div>
   </div>
@@ -331,12 +377,13 @@
 import * as THREE from './js/three.module.js';
 
 /* =========================================================================
-   1. PROCEDURAL SOUND SYNTHESIS ENGINE
+   1. PROCEDURAL SOUND & VOICE ENGINE (Web Audio + Web Speech API)
    ========================================================================= */
 class SoundEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.synth = window.speechSynthesis;
   }
   init() {
     if (!this.ctx) {
@@ -346,6 +393,27 @@ class SoundEngine {
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
+  }
+  speak(text, onEnd) {
+    if (!this.enabled || !this.synth) {
+      if (onEnd) setTimeout(onEnd, 3500);
+      return;
+    }
+    try {
+      this.synth.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.pitch = 0.92;
+      utterance.rate = 0.95;
+      utterance.volume = 1.0;
+      utterance.onend = () => { if (onEnd) onEnd(); };
+      utterance.onerror = () => { if (onEnd) onEnd(); };
+      this.synth.speak(utterance);
+    } catch(e) {
+      if (onEnd) setTimeout(onEnd, 3500);
+    }
+  }
+  stopSpeaking() {
+    if (this.synth) this.synth.cancel();
   }
   playTone(freq, type = 'sine', duration = 0.15, vol = 0.2, pitchBend = 0) {
     if (!this.enabled || !this.ctx) return;
@@ -403,8 +471,10 @@ class SoundEngine {
     const notes = [420, 370, 320, 220];
     notes.forEach((f, i) => setTimeout(() => this.playTone(f, 'sawtooth', 0.22, 0.26, -40), i * 110));
   }
-  sfxStory() {
-    this.playTone(523, 'sine', 0.4, 0.25, 100);
+  sfxCinemaFanfare() {
+    this.playTone(261, 'triangle', 0.3, 0.2);
+    setTimeout(() => this.playTone(392, 'triangle', 0.3, 0.2), 120);
+    setTimeout(() => this.playTone(523, 'triangle', 0.5, 0.25), 240);
   }
 }
 const sfx = new SoundEngine();
@@ -427,6 +497,7 @@ const Playables = {
         });
         window.ytgame.system?.onPause?.(() => {
           if (gameState.mode === 'playing') gameState.paused = true;
+          sfx.stopSpeaking();
         });
         window.ytgame.system?.onResume?.(() => {
           gameState.paused = false;
@@ -450,7 +521,7 @@ const Playables = {
   saveProgress(data) {
     try {
       const json = JSON.stringify(data);
-      localStorage.setItem('army_rush_save_saga', json);
+      localStorage.setItem('army_rush_save_cinema', json);
       if (this.isSDKAvailable) {
         window.ytgame.game?.saveData?.(json);
       }
@@ -458,7 +529,7 @@ const Playables = {
   },
   loadProgress() {
     try {
-      const local = localStorage.getItem('army_rush_save_saga');
+      const local = localStorage.getItem('army_rush_save_cinema');
       if (local) return JSON.parse(local);
     } catch(e){}
     return null;
@@ -466,7 +537,7 @@ const Playables = {
 };
 
 /* =========================================================================
-   3. PERSISTENT PROGRESS & KING INITIALIZATION
+   3. PERSISTENT PROGRESS
    ========================================================================= */
 const progress = Playables.loadProgress() || {
   playerName: '',
@@ -694,7 +765,7 @@ function createScenery(propType) {
 }
 
 /* =========================================================================
-   6. 3D MODELS (Troops, Bosses, Pendulums)
+   6. 3D MODELS
    ========================================================================= */
 function box(parent, w, h, d, material, x, y, z) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
@@ -718,7 +789,6 @@ function makeSoldier(team = 'blue', scale = 1, isKing = false) {
   g.add(head);
 
   if (isKing) {
-    // Royal Golden Crown for King!
     const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.24, 0.22, 6), mats.gold);
     crown.position.y = 1.92;
     g.add(crown);
@@ -800,7 +870,7 @@ function makePendulumTrap(x, z) {
    7. GAME STATE & VARIABLES
    ========================================================================= */
 const gameState = {
-  mode: 'menu',
+  mode: 'story', // 'story', 'menu', 'playing', 'paused', 'won', 'over'
   paused: false,
   currentLevel: 1,
   score: 0,
@@ -838,6 +908,7 @@ const ui = {
   combo: document.querySelector('#comboText'),
   soundBtn: document.querySelector('#soundBtn'),
   soundIcon: document.querySelector('#soundIcon'),
+  storyBtn: document.querySelector('#storyBtn'),
   mapBtn: document.querySelector('#mapBtn'),
   powerupBadge: document.querySelector('#powerupBadge'),
   zoneBanner: document.querySelector('#zoneBanner'),
@@ -847,13 +918,13 @@ const ui = {
   nameModal: document.querySelector('#nameModal'),
   kingNameInput: document.querySelector('#kingNameInput'),
   btnCrown: document.querySelector('#btnCrown'),
-  storyModal: document.querySelector('#storyModal'),
-  storyChapterTitle: document.querySelector('#storyChapterTitle'),
-  storyChapterSub: document.querySelector('#storyChapterSub'),
-  storyIcon: document.querySelector('#storyIcon'),
-  storyText: document.querySelector('#storyText'),
-  btnSkipStory: document.querySelector('#btnSkipStory'),
-  btnNextStory: document.querySelector('#btnNextStory'),
+  cinemaModal: document.querySelector('#cinemaModal'),
+  cinemaCanvas: document.querySelector('#cinemaCanvas'),
+  subtitles: document.querySelector('#subtitles'),
+  cinemaBar: document.querySelector('#cinemaBar'),
+  cinemaChapterName: document.querySelector('#cinemaChapterName'),
+  btnSkipCinema: document.querySelector('#btnSkipCinema'),
+  btnNextCinema: document.querySelector('#btnNextCinema'),
   mapModal: document.querySelector('#mapModal'),
   mapRemaining: document.querySelector('#mapRemaining'),
   mapRow1: document.querySelector('#mapRow1'),
@@ -875,6 +946,7 @@ ui.soundBtn.addEventListener('click', () => {
   sfx.init();
   sfx.enabled = !sfx.enabled;
   updateSoundUI();
+  if (!sfx.enabled) sfx.stopSpeaking();
 });
 
 function showCombo(text) {
@@ -1162,7 +1234,15 @@ addEventListener('pointermove', e => {
    10. MAIN GAME LOOP
    ========================================================================= */
 function update(dt) {
-  if (gameState.mode !== 'playing' || gameState.paused) return;
+  // CRITICAL: ONLY run gameplay when actively in 'playing' mode!
+  if (gameState.mode !== 'playing' || gameState.paused) {
+    // Idle cinematic camera drift for menus and story
+    camera.position.x = Math.sin(performance.now() * 0.0006) * 1.5;
+    camera.position.y = 8.5;
+    camera.lookAt(0, 1.5, -5);
+    return;
+  }
+
   gameState.elapsed += dt;
 
   const biome = BIOMES[(gameState.currentLevel - 1) % BIOMES.length];
@@ -1396,81 +1476,247 @@ function update(dt) {
 }
 
 /* =========================================================================
-   11. NARRATIVE STORY PROLOGUE SYSTEM
+   11. CINEMATIC VIDEO-LIKE IMAGE STORY WITH VOICEOVER
    ========================================================================= */
 const STORY_CHAPTERS = [
   {
-    icon: '🏰',
-    title: 'CHAPTER I',
-    sub: 'THE GOLDEN REALM',
-    getText: (name) => `Long ago, King ${name} ruled the prosperous empire of Solaria with wisdom and glory. Your grand citadel prospered in peace, celebrated across the stars.`
+    title: 'SCENE 1: THE GOLDEN KINGDOM',
+    caption: 'Once upon a time, King {NAME} ruled the glorious empire of Solaria with honor, peace, and abundance.',
+    voiceText: 'In a golden age of peace and prosperity, King {NAME} ruled the glorious realm of Solaria. Your kingdom was a beacon of light, celebrated by all your loyal people.',
+    render: (ctx, t) => {
+      // Majestic Castle Landscape with Sunbeams
+      const grad = ctx.createLinearGradient(0, 0, 0, 450);
+      grad.addColorStop(0, '#3a7bd5');
+      grad.addColorStop(0.65, '#ffd200');
+      grad.addColorStop(1, '#56ab2f');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 800, 450);
+
+      // Sun
+      ctx.fillStyle = '#fff9d2';
+      ctx.beginPath();
+      ctx.arc(400, 150, 70 + Math.sin(t * 2) * 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Castle Spires
+      ctx.fillStyle = '#2c3e50';
+      ctx.fillRect(320, 180, 160, 170);
+      ctx.fillRect(260, 220, 60, 130);
+      ctx.fillRect(480, 220, 60, 130);
+      // Spire Cones
+      ctx.fillStyle = '#d35400';
+      ctx.beginPath(); ctx.moveTo(400, 100); ctx.lineTo(320, 180); ctx.lineTo(480, 180); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(290, 170); ctx.lineTo(260, 220); ctx.lineTo(320, 220); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(510, 170); ctx.lineTo(480, 220); ctx.lineTo(540, 220); ctx.fill();
+
+      // Royal Golden Crown Icon
+      ctx.font = '60px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👑', 400, 280);
+    }
   },
   {
-    icon: '⚔️',
-    title: 'CHAPTER II',
-    sub: 'THE CATACLYSMIC WAR',
-    getText: (name) => `Without warning, a coalition of 10 Dark Warlords struck! In a devastating war, your castles burned, your legions were overwhelmed, and you lost your entire kingdom.`
+    title: 'SCENE 2: THE WAR & THE LOSS OF EVERYTHING',
+    caption: 'Without warning, a dark galactic alliance attacked! In a brutal cataclysm, your kingdom was lost.',
+    voiceText: 'Then came the dark day of war. Ten ruthless warlords struck without mercy! Your knights fell, the citadels burned, and you lost everything.',
+    render: (ctx, t) => {
+      // Apocalyptic Burning Sky & Siege
+      const grad = ctx.createLinearGradient(0, 0, 0, 450);
+      grad.addColorStop(0, '#200101');
+      grad.addColorStop(0.5, '#870000');
+      grad.addColorStop(1, '#ff4500');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 800, 450);
+
+      // Fire sparks
+      for (let i = 0; i < 20; i++) {
+        ctx.fillStyle = i % 2 === 0 ? '#ffcf40' : '#ff0844';
+        const fx = (i * 43 + t * 90) % 800;
+        const fy = 400 - ((i * 27 + t * 140) % 360);
+        ctx.beginPath(); ctx.arc(fx, fy, 4, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Burning Ruined Fortress Silhouettes
+      ctx.fillStyle = '#0f0505';
+      ctx.fillRect(250, 200, 300, 200);
+      ctx.fillRect(160, 260, 90, 140);
+      ctx.fillRect(550, 260, 90, 140);
+
+      // Dark Warlord with Glowing Red Eyes
+      ctx.font = '80px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👿', 400, 270);
+      ctx.font = '55px sans-serif';
+      ctx.fillText('🔥 ⚔️ 🔥', 400, 360);
+    }
   },
   {
-    icon: '🌪️',
-    title: 'CHAPTER III',
-    sub: 'BANISHED TO THE OUTER RIM',
-    getText: (name) => `The Warlords used dark warp magic to exile King ${name} thousands of leagues away into the wilderness of Zone 1, stripped of your crown and riches.`
+    title: 'SCENE 3: BANISHED TO THE OUTER RIM',
+    caption: 'Stripped of your crown, you were cast through a dark rift to the distant wilderness of Zone 1.',
+    voiceText: 'Stripped of your crown and riches, the warlords banished you through a dark rift, leaving you alone in the desolate wilderness of Zone 1.',
+    render: (ctx, t) => {
+      // Dark Cosmic Void Rift & Barren Hills
+      const grad = ctx.createLinearGradient(0, 0, 0, 450);
+      grad.addColorStop(0, '#0d0221');
+      grad.addColorStop(0.6, '#3a0ca3');
+      grad.addColorStop(1, '#1b263b');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 800, 450);
+
+      // Swirling Void Rift
+      ctx.save();
+      ctx.translate(400, 200);
+      ctx.rotate(t * 1.5);
+      for (let r = 120; r > 10; r -= 18) {
+        ctx.strokeStyle = r % 36 === 0 ? '#00f2fe' : '#f72585';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r, r * 0.6, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Fallen King exiled in mist
+      ctx.font = '70px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🌪️', 400, 210);
+      ctx.font = '50px sans-serif';
+      ctx.fillText('🛡️', 400, 360);
+    }
   },
   {
-    icon: '👑',
-    title: 'CHAPTER IV',
-    sub: 'THE RECLAMATION VOW',
-    getText: (name) => `Now, your vengeance begins! You must march across 10 dangerous zones, rally loyal soldiers, slay the 10 dark warlords, and reclaim your rightful kingdom!`
+    title: 'SCENE 4: THE MARCH OF RECLAMATION',
+    caption: 'Gather loyal troopers, crush all 10 dark warlords, and reclaim your royal kingdom!',
+    voiceText: 'From the ashes, King {NAME} rises! Rally every scattered soldier, march across ten hostile zones, defeat each warlord, and reclaim your throne!',
+    render: (ctx, t) => {
+      // Golden Dawn of Vengeance & Army March
+      const grad = ctx.createLinearGradient(0, 0, 0, 450);
+      grad.addColorStop(0, '#11998e');
+      grad.addColorStop(0.5, '#38ef7d');
+      grad.addColorStop(1, '#ffcf40');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 800, 450);
+
+      // Rising Sun
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(400, 380, 160, 0, Math.PI * 2); ctx.fill();
+
+      // Heroic King & Troop Silhouettes
+      ctx.font = '85px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👑', 400, 180);
+      ctx.font = '65px sans-serif';
+      ctx.fillText('⚔️ 🛡️ 🏹', 400, 280);
+      ctx.font = '36px sans-serif';
+      ctx.fillText('🏰 ROAD TO THE CITADEL 🏰', 400, 360);
+    }
   }
 ];
 
-let storyIndex = 0;
-function showStoryChapter(index) {
-  sfx.sfxStory();
-  const c = STORY_CHAPTERS[index];
-  ui.storyIcon.textContent = c.icon;
-  ui.storyChapterTitle.textContent = c.title;
-  ui.storyChapterSub.textContent = c.sub;
-  ui.storyText.textContent = c.getText(progress.playerName || 'Bijon');
-  ui.btnNextStory.textContent = index === STORY_CHAPTERS.length - 1 ? 'BEGIN RECLAMATION ⚔️' : 'CONTINUE >>';
+let cinemaSceneIdx = 0;
+let cinemaTimer = 0;
+let cinemaDuration = 7.0; // 7 seconds per scene
+let cinemaAnimId = null;
+
+function renderCinemaFrame() {
+  const c = ui.cinemaCanvas;
+  const ctx = c.getContext('2d');
+  const t = performance.now() * 0.001;
+  const scene = STORY_CHAPTERS[cinemaSceneIdx];
+  if (scene) {
+    scene.render(ctx, t);
+  }
+  cinemaAnimId = requestAnimationFrame(renderCinemaFrame);
 }
 
-function startStory() {
-  storyIndex = 0;
+function playCinemaScene(idx) {
+  cinemaSceneIdx = idx;
+  const scene = STORY_CHAPTERS[idx];
+  const kingName = progress.playerName || 'Bijon';
+  const subtitle = scene.caption.replace(/{NAME}/g, kingName);
+  const speechText = scene.voiceText.replace(/{NAME}/g, kingName);
+
+  ui.subtitles.textContent = `"${subtitle}"`;
+  ui.cinemaChapterName.textContent = `SCENE ${idx + 1} OF ${STORY_CHAPTERS.length}: ${scene.title.split(': ')[1]}`;
+  ui.btnNextCinema.textContent = idx === STORY_CHAPTERS.length - 1 ? 'BEGIN CAMPAIGN ⚔️' : 'NEXT SCENE ⏩';
+
+  // Speak with voiceover
+  sfx.speak(speechText, () => {
+    // When spoken line completes, auto advance after short breath
+    if (gameState.mode === 'story' && idx < STORY_CHAPTERS.length - 1) {
+      setTimeout(() => {
+        if (gameState.mode === 'story' && cinemaSceneIdx === idx) {
+          playCinemaScene(idx + 1);
+        }
+      }, 1200);
+    }
+  });
+
+  // Animate progress bar
+  ui.cinemaBar.style.transition = 'none';
+  ui.cinemaBar.style.width = '0%';
+  setTimeout(() => {
+    ui.cinemaBar.style.transition = 'width 6.5s linear';
+    ui.cinemaBar.style.width = '100%';
+  }, 50);
+}
+
+function startCinemaPrologue() {
+  gameState.mode = 'story';
+  sfx.init();
+  sfx.sfxCinemaFanfare();
   ui.nameModal.style.display = 'none';
-  ui.storyModal.style.display = 'flex';
-  showStoryChapter(0);
+  ui.cinemaModal.style.display = 'flex';
+  ui.modalOverlay.style.display = 'none';
+  ui.mapModal.style.display = 'none';
+
+  if (!cinemaAnimId) renderCinemaFrame();
+  playCinemaScene(0);
 }
 
-ui.btnNextStory.addEventListener('click', () => {
-  storyIndex++;
-  if (storyIndex < STORY_CHAPTERS.length) {
-    showStoryChapter(storyIndex);
+ui.btnNextCinema.addEventListener('click', () => {
+  sfx.stopSpeaking();
+  if (cinemaSceneIdx < STORY_CHAPTERS.length - 1) {
+    playCinemaScene(cinemaSceneIdx + 1);
   } else {
-    progress.hasSeenStory = true;
-    saveState();
-    ui.storyModal.style.display = 'none';
-    showMainMenu();
+    finishCinemaStory();
   }
 });
 
-ui.btnSkipStory.addEventListener('click', () => {
-  progress.hasSeenStory = true;
-  saveState();
-  ui.storyModal.style.display = 'none';
-  showMainMenu();
+ui.btnSkipCinema.addEventListener('click', () => {
+  sfx.stopSpeaking();
+  finishCinemaStory();
 });
 
-ui.btnCrown.addEventListener('click', () => {
-  const name = ui.kingNameInput.value.trim() || 'Bijon';
-  progress.playerName = name;
+function finishCinemaStory() {
+  sfx.stopSpeaking();
+  progress.hasSeenStory = true;
   saveState();
-  startStory();
+  if (cinemaAnimId) {
+    cancelAnimationFrame(cinemaAnimId);
+    cinemaAnimId = null;
+  }
+  ui.cinemaModal.style.display = 'none';
+  showMainMenu();
+}
+
+ui.storyBtn.addEventListener('click', () => {
+  startCinemaPrologue();
 });
 
 /* =========================================================================
-   12. CAMPAIGN MAP SYSTEM
+   12. NAME MODAL HANDLER
+   ========================================================================= */
+ui.btnCrown.addEventListener('click', () => {
+  sfx.init();
+  const name = ui.kingNameInput.value.trim() || 'Bijon';
+  progress.playerName = name;
+  saveState();
+  startCinemaPrologue();
+});
+
+/* =========================================================================
+   13. CAMPAIGN MAP SYSTEM
    ========================================================================= */
 function renderMap() {
   ui.mapRow1.innerHTML = '';
@@ -1525,7 +1771,7 @@ ui.btnCloseMap.addEventListener('click', () => {
 });
 
 /* =========================================================================
-   13. ARMORY & PROGRESSION
+   14. ARMORY UPGRADES
    ========================================================================= */
 function renderUpgrades() {
   const up = progress.upgrades;
@@ -1575,24 +1821,27 @@ document.querySelector('#upSpeed').addEventListener('click', () => {
 });
 
 /* =========================================================================
-   14. STATE TRANSITIONS & MENUS
+   15. STATE TRANSITIONS & GAME FLOW
    ========================================================================= */
 function startLevel(lvl) {
   sfx.init();
   gameState.currentLevel = lvl;
-  gameState.mode = 'playing';
+  gameState.mode = 'playing'; // Gameplay active ONLY here!
   gameState.score = 0;
   ui.modalOverlay.style.display = 'none';
   ui.mapModal.style.display = 'none';
+  ui.cinemaModal.style.display = 'none';
   ui.bossbar.style.display = 'none';
   buildLevel(lvl);
 }
 
 function showMainMenu() {
+  gameState.mode = 'menu';
+  clearEntities(); // Keep background clean
   ui.mTitle.textContent = `KING ${progress.playerName.toUpperCase()}'S ARMY`;
   ui.mSubtitle.textContent = `Campaign: Zone ${gameState.currentLevel} of 10`;
   ui.mDesc.textContent = `March across the frontiers to reconquer your stolen throne. Spend your gold coins in the Armory below to expand your squad size and firepower!`;
-  ui.mAction.textContent = `MARCH TO ZONE ${gameState.currentLevel}`;
+  ui.mAction.textContent = `MARCH TO ZONE ${gameState.currentLevel} ⚔️`;
   ui.modalOverlay.style.display = 'flex';
   renderUpgrades();
 }
@@ -1605,7 +1854,7 @@ function gameOver() {
   ui.mTitle.textContent = 'REGIMENT FALLEN';
   ui.mSubtitle.textContent = `Zone ${gameState.currentLevel} Overwhelmed`;
   ui.mDesc.textContent = `King ${progress.playerName}, your frontline was broken! Regroup your forces, upgrade your arms in the Armory below, and strike again!`;
-  ui.mAction.textContent = 'RETRY ASSAULT';
+  ui.mAction.textContent = 'RETRY ASSAULT ⚔️';
   ui.modalOverlay.style.display = 'flex';
   renderUpgrades();
 }
@@ -1626,9 +1875,8 @@ function levelCleared() {
     ui.mTitle.textContent = 'VICTORY! 🏆';
     ui.mSubtitle.textContent = `Zone ${gameState.currentLevel} Liberated (+🪙${reward})`;
     ui.mDesc.textContent = `Glorious victory, King ${progress.playerName}! Another warlord has fallen. Advance deeper toward your Kingdom Citadel: ${nextZone.name}!`;
-    ui.mAction.textContent = `MARCH TO ${nextZone.name.split('• ')[0]}`;
+    ui.mAction.textContent = `MARCH TO ${nextZone.name.split('• ')[0]} ⚔️`;
   } else {
-    // Grand Ending!
     ui.mTitle.textContent = '👑 THE THRONE IS RECLAIMED!';
     ui.mSubtitle.textContent = `King ${progress.playerName} Restores the Kingdom!`;
     ui.mDesc.textContent = `The Galactic Sovereign has been crushed! The dark warlords are vanquished, and peace returns to your glorious empire. You are hailed as the Eternal King! (+🪙${reward})`;
@@ -1648,7 +1896,7 @@ ui.mAction.addEventListener('click', () => {
 });
 
 /* =========================================================================
-   15. INITIALIZATION & SAGA FLOW
+   16. BOOTSTRAP INITIALIZATION
    ========================================================================= */
 let lastFrameTime = performance.now();
 function animate(now) {
@@ -1666,19 +1914,16 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 
-// Initial boot check:
+// Start Boot Flow
 saveState();
 Playables.init();
 Playables.onGameReady();
 
-if (!progress.playerName) {
-  // First time launch: Prompt for King Name
-  ui.nameModal.style.display = 'flex';
-} else if (!progress.hasSeenStory) {
-  startStory();
-} else {
-  showMainMenu();
-}
+// Fix hang: Always prompt name first, then launch cinema story
+ui.nameModal.style.display = 'flex';
+ui.modalOverlay.style.display = 'none';
+ui.mapModal.style.display = 'none';
+ui.cinemaModal.style.display = 'none';
 </script>
 </body>
 </html>
